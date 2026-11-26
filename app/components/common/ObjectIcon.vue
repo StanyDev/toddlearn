@@ -4,6 +4,7 @@ import { getObject } from '~/data/objects'
 const props = withDefaults(defineProps<{ name: string; size?: number | string; decorative?: boolean }>(), { size: 64, decorative: false })
 
 const info = computed(() => getObject(props.name))
+const baseURL = useRuntimeConfig().app.baseURL
 const failed = ref(false)
 watch(() => props.name, () => (failed.value = false))
 const dim = computed(() => (typeof props.size === 'number' ? `${props.size}px` : props.size))
@@ -13,7 +14,7 @@ const dim = computed(() => (typeof props.size === 'number' ? `${props.size}px` :
   <span class="inline-flex shrink-0 items-center justify-center" :style="{ width: dim, height: dim }">
     <img
       v-if="!failed"
-      :src="`/images/objects/${info.key}.svg`"
+      :src="`${baseURL}images/objects/${info.key}.svg`"
       :alt="decorative ? '' : info.label"
       draggable="false"
       loading="lazy"

@@ -60,7 +60,11 @@ function init() {
   window.addEventListener('keydown', unlock, { capture: true })
 }
 
-function loadBuffer(url: string): Promise<AudioBuffer | null> {
+/** Prefix a public-folder path with the app's base URL (e.g. `/toddlearn/`). */
+const withBaseURL = (path: string) => useRuntimeConfig().app.baseURL.replace(/\/$/, '') + path
+
+function loadBuffer(path: string): Promise<AudioBuffer | null> {
+  const url = withBaseURL(path)
   let p = buffers.get(url)
   if (!p) {
     p = fetch(url)
