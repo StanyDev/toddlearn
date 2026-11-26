@@ -85,3 +85,5 @@ The PWA service worker precaches the app shell, all illustrations and all voice 
 - Object illustrations: [Twemoji](https://github.com/jdecked/twemoji) © Twitter, Inc. and contributors, licensed [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/). They're copied by `scripts/build-illustrations.mjs`.
 - Dino, the monster, scenes, balloons, fish, race car and UI art are original SVG drawn for DinoLand.
 - Font: Fredoka (SIL Open Font License) via Fontsource.
+
+## THANKS
