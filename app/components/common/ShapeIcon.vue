@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ShapeId } from '~/types'
-import { SHAPE_COLORS } from '~/data/learning'
+import { SHAPE_COLORS, shapeById } from '~/data/learning'
 
 const props = withDefaults(defineProps<{ shape: ShapeId; color?: string; size?: number | string; outline?: boolean }>(), {
   size: 80,
@@ -23,7 +23,7 @@ const PATHS: Record<ShapeId, string> = {
 </script>
 
 <template>
-  <svg viewBox="0 0 100 100" :style="{ width: dim, height: dim }" class="shrink-0 overflow-visible" role="img" :aria-label="shape">
+  <svg viewBox="0 0 100 100" :style="{ width: dim, height: dim }" class="shrink-0 overflow-visible" role="img" :aria-label="shapeById(shape).name">
     <path
       :d="PATHS[shape]"
       :fill="outline ? 'none' : fill"

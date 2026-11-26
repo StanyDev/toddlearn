@@ -1,4 +1,6 @@
 import type { ObjectInfo } from '../types'
+import { localize } from '../locales/index.ts'
+import { ID_OBJECTS } from '../locales/id.ts'
 
 /**
  * Catalogue of every illustrated object used in DinoLand.
@@ -106,6 +108,13 @@ export const OBJECTS: ObjectInfo[] = [
   { key: 'pear', label: 'Pear', emoji: '🍐', color: 'green' },
   { key: 'peach', label: 'Peach', emoji: '🍑' },
 
+  // Extra pictures for the Indonesian alphabet (Harimau, Nanas, Orang utan…)
+  { key: 'tiger', label: 'Tiger', emoji: '🐯' },
+  { key: 'pineapple', label: 'Pineapple', emoji: '🍍', color: 'yellow' },
+  { key: 'orangutan', label: 'Orangutan', emoji: '🦧' },
+  { key: 'snake', label: 'Snake', emoji: '🐍', color: 'green' },
+  { key: 'violin', label: 'Violin', emoji: '🎻' },
+
   // UI / category illustrations
   { key: 'palette', label: 'Palette', emoji: '🎨' },
   { key: 'pencil', label: 'Pencil', emoji: '✏️' },
@@ -145,6 +154,9 @@ export const OBJECTS: ObjectInfo[] = [
   { key: 'mushroom', label: 'Mushroom', emoji: '🍄' },
   { key: 'snail', label: 'Snail', emoji: '🐌' },
 ]
+
+// Labels follow the current language.
+localize(OBJECTS, 'label', { id: (o) => ID_OBJECTS[o.key] })
 
 /** Objects drawn by hand rather than copied from Twemoji. */
 export const CUSTOM_OBJECTS = new Set(['xylophone'])

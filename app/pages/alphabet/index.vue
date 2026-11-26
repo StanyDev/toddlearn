@@ -1,3 +1,3 @@
 <template>
-  <CategoryHub category="alphabet" greeting="Let's learn the ABC!" />
+  <CategoryHub category="alphabet" />
 </template>

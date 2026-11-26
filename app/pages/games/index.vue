@@ -1,3 +1,3 @@
 <template>
-  <CategoryHub category="games" greeting="Pick a fun game!" />
+  <CategoryHub category="games" />
 </template>

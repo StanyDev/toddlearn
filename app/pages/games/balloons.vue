@@ -3,6 +3,7 @@ import { LETTERS } from '~/data/learning'
 import { distractors, randInt, sample, shuffle } from '~/utils/random'
 
 /** Pop the balloon that shows the number or letter Dino asks for. */
+const { m } = useI18n()
 const audio = useAudio()
 const COLORS = ['#FF6B8B', '#3FB5EA', '#F5C842', '#3DBE8B', '#A78BFA', '#FF9F5A']
 
@@ -68,7 +69,7 @@ function tap(b: Balloon) {
 <template>
   <GameShell :game="game" activity-id="game-balloons" bg="bg-gradient-to-b from-sky to-[#E6F7FF]">
     <div class="flex w-full max-w-5xl flex-1 flex-col items-center gap-4">
-      <GameQuestion text="Pop" :voice="target ? ['pop-balloon', target.voice] : []" :hint="target ? (mode === 'number' ? { kind: 'number', value: Number(target.label) } : { kind: 'letter', value: target.label }) : undefined" />
+      <GameQuestion :text="m.quiz.pop" :voice="target ? ['pop-balloon', target.voice] : []" :hint="target ? (mode === 'number' ? { kind: 'number', value: Number(target.label) } : { kind: 'letter', value: target.label }) : undefined" />
 
       <div class="relative w-full flex-1" style="min-height: min(60vh, 460px)">
         <template v-for="b in balloons" :key="b.id">
@@ -80,7 +81,7 @@ function tap(b: Balloon) {
             :initial="{ y: 500, opacity: 0 }"
             :animate="popped === b.id ? { scale: 1.6, opacity: 0 } : { y: 0, opacity: 1, scale: 1 }"
             :transition="popped === b.id ? { duration: 0.25 } : { type: 'spring', stiffness: 60, damping: 12, delay: b.delay * 0.3 }"
-            :aria-label="`Balloon ${b.label}`"
+            :aria-label="m.games.balloon(b.label)"
             @click="tap(b)"
           >
             <span class="balloon-bob block h-full w-full" :class="{ 'animate-wiggle': wobble === b.id }" :style="{ animationDuration: `${b.dur}s`, animationDelay: `-${b.delay}s` }">

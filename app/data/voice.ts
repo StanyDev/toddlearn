@@ -1,21 +1,27 @@
 import { COLORS, LETTERS, NUMBERS, SHAPES } from './learning.ts'
 import { OBJECTS } from './objects.ts'
+import { locale, type Locale } from '../locales/index.ts'
+import { ID_COLORS, ID_LETTERS, ID_NUMBERS, ID_OBJECTS, ID_PHRASES, ID_SHAPES } from '../locales/id.ts'
 
 /**
  * Voice clip catalogue.
  *
- * Every clip has a key and the text that is spoken. Recorded files live at
- *   public/audio/voice/<key>.m4a
- * e.g. `numbers/5` → public/audio/voice/numbers/5.m4a
+ * Every clip has a key and, per language, the text that is spoken. Recorded
+ * files live at
+ *   public/audio/voice/<locale>/<key>.m4a
+ * e.g. `numbers/5` → public/audio/voice/en/numbers/5.m4a ("Five")
+ *                    public/audio/voice/id/numbers/5.m4a ("Lima")
+ * Keys are shared by all languages, so instructions are built the same way
+ * everywhere (e.g. ['find-the-number', 'numbers/5']).
  *
- * The shipped clips are generated with `scripts/generate-voice.sh` (macOS
+ * The shipped clips are generated with `scripts/generate-voice.mjs` (macOS
  * text-to-speech) as development stand-ins. To use a professional voice-over,
  * record files with the same keys and drop them into the same folders — no
  * code changes needed. If a file is missing, useAudio() falls back to the
  * browser's speech synthesis using `text` (configurable in the parent area).
  */
 
-/** Fixed phrases: instructions, praise and encouragement. */
+/** Fixed phrases: instructions, praise and encouragement (English). */
 export const PHRASES = {
   'welcome': "Hi! I'm Dino! Let's play and learn together!",
   'welcome-back': 'Yay, you are back! What shall we play?',
@@ -85,23 +91,51 @@ export const PHRASES = {
 
 export type PhraseKey = keyof typeof PHRASES
 
-/** Build the full key → text map used by both the app and the generator. */
-export function buildVoiceCatalog(): Record<string, string> {
-  const map: Record<string, string> = { ...PHRASES }
-  for (const n of NUMBERS) {
-    map[`numbers/${n.value}`] = n.name
-    map[`count-the/${n.value}`] = n.value === 1 ? `Look! One ${n.plural}!` : `Let's count the ${n.plural}!`
+/** Build the full key → text map for one language (used by the app and the generator). */
+export function buildVoiceCatalog(lang: Locale = 'en'): Record<string, string> {
+  if (lang === 'id') {
+    const map: Record<string, string> = { ...ID_PHRASES }
+    for (const n of NUMBERS) {
+      const thing = (ID_OBJECTS[n.object] ?? n.object).toLowerCase()
+      map[`numbers/${n.value}`] = ID_NUMBERS[n.value]!
+      map[`count-the/${n.value}`] = n.value === 1 ? `Lihat! Satu ${thing}!` : `Ayo hitung ${thing}!`
+    }
+    for (const l of LETTERS) {
+      const info = ID_LETTERS[l.lower]!
+      map[`letters/${l.lower}`] = info.say
+      map[`letter-words/${l.lower}`] = `${info.say}, untuk ${info.word}!`
+    }
+    for (const c of COLORS) map[`colors/${c.id}`] = ID_COLORS[c.id]
+    for (const s of SHAPES) map[`shapes/${s.id}`] = ID_SHAPES[s.id]
+    for (const o of OBJECTS) map[`words/${o.key}`] = ID_OBJECTS[o.key] ?? o.key
+    return map
   }
-  for (const l of LETTERS) {
-    map[`letters/${l.lower}`] = l.upper
-    map[`letter-words/${l.lower}`] = `${l.upper} is for ${l.word}!`
+  // English: data/* holds English text, but read it with the locale pinned
+  // so the catalogue never picks up another language's translations.
+  const previous = locale.value
+  locale.value = 'en'
+  try {
+    const map: Record<string, string> = { ...PHRASES }
+    for (const n of NUMBERS) {
+      map[`numbers/${n.value}`] = n.name
+      map[`count-the/${n.value}`] = n.value === 1 ? `Look! One ${n.plural}!` : `Let's count the ${n.plural}!`
+    }
+    for (const l of LETTERS) {
+      map[`letters/${l.lower}`] = l.upper
+      map[`letter-words/${l.lower}`] = `${l.upper} is for ${l.word}!`
+    }
+    for (const c of COLORS) map[`colors/${c.id}`] = c.name
+    for (const s of SHAPES) map[`shapes/${s.id}`] = s.name
+    for (const o of OBJECTS) map[`words/${o.key}`] = o.label
+    return map
+  } finally {
+    locale.value = previous
   }
-  for (const c of COLORS) map[`colors/${c.id}`] = c.name
-  for (const s of SHAPES) map[`shapes/${s.id}`] = s.name
-  for (const o of OBJECTS) map[`words/${o.key}`] = o.label
-  return map
 }
 
-export const VOICE_CATALOG = buildVoiceCatalog()
+export const VOICE_CATALOGS: Record<Locale, Record<string, string>> = {
+  en: buildVoiceCatalog('en'),
+  id: buildVoiceCatalog('id'),
+}
 
-export const voicePath = (key: string) => `/audio/voice/${key}.m4a`
+export const voicePath = (key: string, lang: Locale) => `/audio/voice/${lang}/${key}.m4a`

@@ -3,6 +3,7 @@ import type { CategoryDef } from '~/data/activities'
 import { THEME } from '~/utils/theme'
 
 /** Big, colourful home-screen card for a learning area. */
+const { m } = useI18n()
 const props = defineProps<{ category: CategoryDef; progress: number; index?: number }>()
 const audio = useAudio()
 const router = useRouter()
@@ -66,7 +67,7 @@ function open() {
         <svg viewBox="0 0 48 48" class="h-8 w-8" aria-hidden="true"><path d="M18 10 L32 24 L18 38" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round" /></svg>
       </span>
     </span>
-    <span class="relative mt-3 block h-4 overflow-hidden rounded-full bg-white/60" role="progressbar" :aria-valuenow="Math.round(progress * 100)" aria-valuemin="0" aria-valuemax="100" :aria-label="`${category.title} progress`">
+    <span class="relative mt-3 block h-4 overflow-hidden rounded-full bg-white/60" role="progressbar" :aria-valuenow="Math.round(progress * 100)" aria-valuemin="0" aria-valuemax="100" :aria-label="m.common.progressOf(category.title)">
       <span class="block h-full rounded-full transition-[width] duration-700" :class="theme.deep" :style="{ width: `${Math.max(4, progress * 100)}%` }" />
     </span>
   </Motion>

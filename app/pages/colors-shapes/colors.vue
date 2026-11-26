@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { ColorId } from '~/types'
 import { COLORS, colorById } from '~/data/learning'
+import { getObject } from '~/data/objects'
+const { m } = useI18n()
 
 const audio = useAudio()
 const { progress, exploreColor, addStars, startActivity, completeActivity, isCompleted } = useProgress()
@@ -46,7 +48,7 @@ onMounted(() => {
       :animate="{ scale: 1, opacity: 1 }"
       :transition="{ type: 'spring', stiffness: 260, damping: 18 }"
     >
-      <button type="button" class="flex items-center gap-3 text-5xl font-bold sm:text-6xl" :aria-label="`${info.name}. Tap to hear it`" @click="audio.say(`colors/${selected}`)">
+      <button type="button" class="flex items-center gap-3 text-5xl font-bold sm:text-6xl" :aria-label="m.common.tapToHear(info.name)" @click="audio.say(`colors/${selected}`)">
         {{ info.name }}
         <svg viewBox="0 0 48 48" class="h-10 w-10" aria-hidden="true"><path d="M8 18 H16 L27 9 V39 L16 30 H8 Z" fill="currentColor" /><path d="M33 17 Q38 24 33 31 M38 12 Q46 24 38 36" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" /></svg>
       </button>
@@ -56,7 +58,7 @@ onMounted(() => {
           :key="o"
           type="button"
           class="toy flex h-28 w-28 items-center justify-center bg-white sm:h-32 sm:w-32"
-          :aria-label="o"
+          :aria-label="getObject(o).label"
           @click="sayObject(o)"
         >
           <ObjectIcon :name="o" :size="84" />
@@ -64,7 +66,7 @@ onMounted(() => {
       </div>
     </Motion>
 
-    <nav class="grid w-full max-w-3xl grid-cols-5 gap-3 sm:grid-cols-9 sm:gap-2" aria-label="Colors">
+    <nav class="grid w-full max-w-3xl grid-cols-5 gap-3 sm:grid-cols-9 sm:gap-2" :aria-label="m.explorer.colors">
       <button
         v-for="c in COLORS"
         :key="c.id"

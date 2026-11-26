@@ -4,6 +4,7 @@ import { colorById, shapeById } from '~/data/learning'
 import { pick, sample, shuffle } from '~/utils/random'
 
 /** Sort coloured shapes into boxes — by colour, then by shape. */
+const { m } = useI18n()
 const audio = useAudio()
 
 interface Item { id: number; shape: ShapeId; color: ColorId }
@@ -91,10 +92,10 @@ function tapBin(bin: string) {
 <template>
   <GameShell :game="game" activity-id="colors-shapes-sort">
     <div class="flex w-full max-w-4xl flex-col items-center gap-6">
-      <GameQuestion :text="mode === 'color' ? 'Sort by color' : 'Sort by shape'" :voice="[mode === 'color' ? 'sort-by-color' : 'sort-by-shape']" />
+      <GameQuestion :text="mode === 'color' ? m.quiz.sortByColor : m.quiz.sortByShape" :voice="[mode === 'color' ? 'sort-by-color' : 'sort-by-shape']" />
 
       <!-- tray -->
-      <div class="flex min-h-32 w-full flex-wrap items-center justify-center gap-3 rounded-[2rem] bg-white/70 p-4" aria-label="Things to sort">
+      <div class="flex min-h-32 w-full flex-wrap items-center justify-center gap-3 rounded-[2rem] bg-white/70 p-4" :aria-label="m.sort.thingsToSort">
         <button
           v-for="it in items"
           :key="it.id"
@@ -119,7 +120,7 @@ function tapBin(bin: string) {
           class="toy flex min-h-44 flex-col items-center justify-start gap-2 bg-white p-3 transition-transform"
           :class="[drag.overDrop.value === b ? 'scale-105 ring-8 ring-mint-deep' : '', wrongBin === b ? 'animate-wiggle' : '', selected !== null ? 'ring-4 ring-sunny/60' : '']"
           :data-drop="b"
-          :aria-label="`${mode === 'color' ? colorById(b as ColorId).name : shapeById(b as ShapeId).name} box`"
+          :aria-label="m.sort.box(mode === 'color' ? colorById(b as ColorId).name : shapeById(b as ShapeId).name)"
           @click="tapBin(b)"
         >
           <span class="flex h-20 w-full items-center justify-center rounded-2xl" :style="mode === 'color' ? { background: colorById(b as ColorId).hex + '33' } : {}">

@@ -1,6 +1,7 @@
 import { ref, watch } from 'vue'
 import { ENCOURAGE_KEYS, PRAISE_KEYS, SFX_FILES } from '~/data/audio'
-import { VOICE_CATALOG, voicePath } from '~/data/voice'
+import { VOICE_CATALOGS, voicePath } from '~/data/voice'
+import { locale, localeInfo } from '~/locales'
 import { playSynth, type SfxName } from '~/utils/synth'
 import { pick } from '~/utils/random'
 
@@ -110,15 +111,18 @@ function playBuffer(buf: AudioBuffer, out: AudioNode, track = true): Promise<voi
 
 function speakFallback(key: string): Promise<void> {
   const { settings } = useSettings()
-  const text = VOICE_CATALOG[key]
+  const lang = locale.value
+  const text = VOICE_CATALOGS[lang][key]
   if (!text || !settings.value.speechFallback || !('speechSynthesis' in window)) return Promise.resolve()
   return new Promise((resolve) => {
     const u = new SpeechSynthesisUtterance(text)
-    u.lang = 'en-US'
+    u.lang = localeInfo(lang).tag
     u.rate = 0.9
     u.pitch = 1.15
     u.volume = settings.value.voiceVolume
-    const voice = speechSynthesis.getVoices().find((v) => v.lang.startsWith('en'))
+    // Match the language ("id-ID", "id_ID" and the legacy "in-ID" all occur).
+    const prefixes = lang === 'id' ? ['id', 'in'] : [lang]
+    const voice = speechSynthesis.getVoices().find((v) => prefixes.some((p) => v.lang.toLowerCase().replace('_', '-').startsWith(p + '-') || v.lang.toLowerCase() === p))
     if (voice) u.voice = voice
     const guard = setTimeout(resolve, 6000)
     u.onend = u.onerror = () => {
@@ -136,7 +140,7 @@ function speakFallback(key: string): Promise<void> {
 
 async function playVoiceClip(key: string, token: number) {
   if (token !== sequenceToken) return
-  const buf = await loadBuffer(voicePath(key))
+  const buf = await loadBuffer(voicePath(key, locale.value))
   if (token !== sequenceToken) return
   if (buf && voiceGain) await playBuffer(buf, voiceGain)
   else await speakFallback(key)
@@ -190,7 +194,7 @@ export function useAudio() {
 
   /** Warm the cache so the next clips start instantly. */
   function preload(keys: string[]) {
-    for (const k of keys) void loadBuffer(voicePath(k))
+    for (const k of keys) void loadBuffer(voicePath(k, locale.value))
   }
 
   const praise = () => pick(PRAISE_KEYS)

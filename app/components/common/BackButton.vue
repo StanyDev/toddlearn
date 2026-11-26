@@ -4,10 +4,10 @@
  * With `hold`, it must be pressed for a moment (a ring fills up) so a stray
  * tap in the middle of a game doesn't kick a toddler out of the activity.
  */
+const { m } = useI18n()
 const props = withDefaults(defineProps<{ to: string; hold?: boolean; icon?: 'back' | 'home'; label?: string }>(), {
   hold: false,
   icon: 'back',
-  label: 'Go back',
 })
 const router = useRouter()
 const audio = useAudio()
@@ -63,7 +63,7 @@ const C = 2 * Math.PI * 30
       type="button"
       class="toy flex h-16 w-16 items-center justify-center bg-white text-ink sm:h-[4.5rem] sm:w-[4.5rem]"
       :class="{ 'animate-wiggle': hint }"
-      :aria-label="hold ? `${label} (press and hold)` : label"
+      :aria-label="hold ? m.common.pressAndHold(label ?? m.common.goBack) : (label ?? m.common.goBack)"
       @pointerdown="down"
       @pointerup="up"
       @pointercancel="up"
@@ -83,7 +83,7 @@ const C = 2 * Math.PI * 30
       </svg>
     </button>
     <Transition enter-from-class="opacity-0 -translate-y-1" leave-to-class="opacity-0">
-      <span v-if="hint" class="absolute top-full left-1/2 mt-2 -translate-x-1/2 rounded-full bg-ink px-3 py-1 text-sm font-semibold whitespace-nowrap text-white transition">Hold me ✋</span>
+      <span v-if="hint" class="absolute top-full left-1/2 mt-2 -translate-x-1/2 rounded-full bg-ink px-3 py-1 text-sm font-semibold whitespace-nowrap text-white transition">{{ m.common.holdMe }}</span>
     </Transition>
   </div>
 </template>

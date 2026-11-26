@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import type { CategoryId } from '~/types'
+import type { Locale } from '~/locales'
 import { ACTIVITIES, CATEGORIES, getActivity } from '~/data/activities'
 import { COLORS, LETTERS, NUMBERS, SHAPES } from '~/data/learning'
 import { ACHIEVEMENTS } from '~/data/rewards'
 import { THEME } from '~/utils/theme'
+import { localeInfo } from '~/locales'
 
-useHead({ title: 'Parent Dashboard · DinoLand' })
+const { m, locale, setLocale, locales } = useI18n()
+useHead({ title: () => `${m.value.parent.pageTitle} · DinoLand` })
 
 const session = useParentSession()
 const unlocked = ref(session.isUnlocked())
@@ -26,9 +29,10 @@ function lockNow() {
 /* --------------------------------- stats -------------------------------- */
 function fmt(ms: number) {
   const min = Math.floor(ms / 60000)
-  if (min < 1) return ms > 0 ? '< 1 min' : '0 min'
+  const t = m.value.parent
+  if (min < 1) return ms > 0 ? t.lessThanMin : t.zeroMin
   const h = Math.floor(min / 60)
-  return h ? `${h} h ${min % 60} min` : `${min} min`
+  return t.duration(h, min % 60)
 }
 const today = computed(() => progress.value.dailyTimeMs[todayKey()] ?? 0)
 const week = computed(() => {
@@ -37,7 +41,7 @@ const week = computed(() => {
     const d = new Date()
     d.setDate(d.getDate() - i)
     const key = todayKey(d)
-    days.push({ key, label: d.toLocaleDateString(undefined, { weekday: 'short' }), ms: progress.value.dailyTimeMs[key] ?? 0 })
+    days.push({ key, label: d.toLocaleDateString(localeInfo(locale.value).tag, { weekday: 'short' }), ms: progress.value.dailyTimeMs[key] ?? 0 })
   }
   const max = Math.max(60000, ...days.map((d) => d.ms))
   return days.map((d) => ({ ...d, pct: d.ms / max }))
@@ -54,16 +58,22 @@ const pinDraft = ref('')
 const pinMessage = ref('')
 function savePin() {
   if (!/^\d{4}$/.test(pinDraft.value)) {
-    pinMessage.value = 'Please enter exactly 4 digits.'
+    pinMessage.value = m.value.parent.pinInvalid
     return
   }
   update({ parentPin: pinDraft.value })
   pinDraft.value = ''
-  pinMessage.value = 'PIN saved. It will be asked for next time.'
+  pinMessage.value = m.value.parent.pinSaved
 }
 function clearPin() {
   update({ parentPin: '' })
-  pinMessage.value = 'PIN removed. A grown-up math question will be used instead.'
+  pinMessage.value = m.value.parent.pinRemoved
+}
+function setLanguage(id: Locale) {
+  setLocale(id)
+  // Let the parent hear the new voice straight away.
+  audio.preload(['praise-1'])
+  void audio.say('praise-1')
 }
 function testSound() {
   void audio.say('praise-1')
@@ -92,11 +102,12 @@ function exportData() {
 const timeAgo = (t: number) => {
   if (!t) return '—'
   const min = Math.round((Date.now() - t) / 60000)
-  if (min < 1) return 'just now'
-  if (min < 60) return `${min} min ago`
+  const p = m.value.parent
+  if (min < 1) return p.justNow
+  if (min < 60) return p.minAgo(min)
   const h = Math.round(min / 60)
-  if (h < 24) return `${h} h ago`
-  return new Date(t).toLocaleDateString()
+  if (h < 24) return p.hoursAgo(h)
+  return new Date(t).toLocaleDateString(localeInfo(locale.value).tag)
 }
 </script>
 
@@ -110,44 +121,44 @@ const timeAgo = (t: number) => {
       <header class="flex flex-wrap items-center gap-3">
         <DinoMascot :size="64" :animated="false" />
         <div class="flex-1">
-          <h1 class="text-3xl font-bold text-ink">Parent Dashboard</h1>
-          <p class="text-ink-soft">Everything is stored only on this device.</p>
+          <h1 class="text-3xl font-bold text-ink">{{ m.parent.title }}</h1>
+          <p class="text-ink-soft">{{ m.parent.storedLocally }}</p>
         </div>
-        <button type="button" class="rounded-full border-2 border-ink/10 bg-white px-4 py-2 font-semibold text-ink" @click="lockNow">Lock</button>
-        <NuxtLink to="/" class="rounded-full bg-mint-deep px-5 py-2 font-bold text-white shadow-pop-sm">Back to DinoLand</NuxtLink>
+        <button type="button" class="rounded-full border-2 border-ink/10 bg-white px-4 py-2 font-semibold text-ink" @click="lockNow">{{ m.parent.lock }}</button>
+        <NuxtLink to="/" class="rounded-full bg-mint-deep px-5 py-2 font-bold text-white shadow-pop-sm">{{ m.parent.backToApp }}</NuxtLink>
       </header>
 
       <!-- summary -->
-      <section class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label="Summary">
+      <section class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4" :aria-label="m.parent.summary">
         <div class="rounded-3xl bg-white p-5 shadow-soft">
-          <p class="text-sm font-semibold tracking-wide text-ink-soft uppercase">Learning time</p>
+          <p class="text-sm font-semibold tracking-wide text-ink-soft uppercase">{{ m.parent.learningTime }}</p>
           <p class="mt-1 text-3xl font-bold text-ink">{{ fmt(progress.totalTimeMs) }}</p>
-          <p class="text-sm text-ink-soft">Today: {{ fmt(today) }}</p>
+          <p class="text-sm text-ink-soft">{{ m.parent.today(fmt(today)) }}</p>
         </div>
         <div class="rounded-3xl bg-white p-5 shadow-soft">
-          <p class="text-sm font-semibold tracking-wide text-ink-soft uppercase">Stars earned</p>
+          <p class="text-sm font-semibold tracking-wide text-ink-soft uppercase">{{ m.parent.starsEarned }}</p>
           <p class="mt-1 flex items-center gap-2 text-3xl font-bold text-ink"><ObjectIcon name="star" :size="30" decorative />{{ progress.stars }}</p>
-          <p class="text-sm text-ink-soft">Badges: {{ badgesUnlocked }} / {{ ACHIEVEMENTS.length }}</p>
+          <p class="text-sm text-ink-soft">{{ m.parent.badges(badgesUnlocked, ACHIEVEMENTS.length) }}</p>
         </div>
         <div class="rounded-3xl bg-white p-5 shadow-soft">
-          <p class="text-sm font-semibold tracking-wide text-ink-soft uppercase">Activities completed</p>
+          <p class="text-sm font-semibold tracking-wide text-ink-soft uppercase">{{ m.parent.activitiesCompleted }}</p>
           <p class="mt-1 text-3xl font-bold text-ink">{{ totalCompleted }}</p>
-          <p class="text-sm text-ink-soft">{{ Object.keys(progress.activities).length }} of {{ ACTIVITIES.length }} tried</p>
+          <p class="text-sm text-ink-soft">{{ m.parent.tried(Object.keys(progress.activities).length, ACTIVITIES.length) }}</p>
         </div>
         <div class="rounded-3xl bg-white p-5 shadow-soft">
-          <p class="text-sm font-semibold tracking-wide text-ink-soft uppercase">Explored</p>
-          <p class="mt-1 text-lg font-bold text-ink">{{ progress.learnedNumbers.length }}/20 numbers</p>
-          <p class="text-lg font-bold text-ink">{{ progress.learnedLetters.length }}/26 letters</p>
+          <p class="text-sm font-semibold tracking-wide text-ink-soft uppercase">{{ m.parent.explored }}</p>
+          <p class="mt-1 text-lg font-bold text-ink">{{ m.parent.numbersExplored(progress.learnedNumbers.length) }}</p>
+          <p class="text-lg font-bold text-ink">{{ m.parent.lettersExplored(progress.learnedLetters.length) }}</p>
         </div>
       </section>
 
       <div class="mt-6 grid gap-6 lg:grid-cols-2">
         <!-- weekly time -->
         <section class="rounded-3xl bg-white p-5 shadow-soft" aria-labelledby="week-h">
-          <h2 id="week-h" class="text-xl font-bold text-ink">Last 7 days</h2>
+          <h2 id="week-h" class="text-xl font-bold text-ink">{{ m.parent.last7Days }}</h2>
           <div class="mt-4 flex h-40 items-end gap-3">
             <div v-for="d in week" :key="d.key" class="flex flex-1 flex-col items-center gap-1">
-              <span class="text-xs text-ink-soft">{{ Math.round(d.ms / 60000) }}m</span>
+              <span class="text-xs text-ink-soft">{{ m.parent.minutesShort(Math.round(d.ms / 60000)) }}</span>
               <div class="w-full rounded-t-lg bg-sky-deep/80" :style="{ height: `${Math.max(3, d.pct * 110)}px` }" :title="fmt(d.ms)" />
               <span class="text-xs font-semibold text-ink-soft">{{ d.label }}</span>
             </div>
@@ -156,7 +167,7 @@ const timeAgo = (t: number) => {
 
         <!-- category progress -->
         <section class="rounded-3xl bg-white p-5 shadow-soft" aria-labelledby="prog-h">
-          <h2 id="prog-h" class="text-xl font-bold text-ink">Learning progress</h2>
+          <h2 id="prog-h" class="text-xl font-bold text-ink">{{ m.parent.learningProgress }}</h2>
           <div class="mt-4 space-y-4">
             <div v-for="row in categoryRows" :key="row.c.id">
               <div class="flex justify-between text-sm font-semibold text-ink"><span>{{ row.c.title }}</span><span>{{ row.pct }}%</span></div>
@@ -170,21 +181,21 @@ const timeAgo = (t: number) => {
 
       <!-- explored items -->
       <section class="mt-6 rounded-3xl bg-white p-5 shadow-soft" aria-labelledby="exp-h">
-        <h2 id="exp-h" class="text-xl font-bold text-ink">What has been explored</h2>
-        <p class="text-sm text-ink-soft">Highlighted items have been explored. A pencil means it was traced.</p>
-        <h3 class="mt-4 font-semibold text-ink">Numbers</h3>
+        <h2 id="exp-h" class="text-xl font-bold text-ink">{{ m.parent.whatExplored }}</h2>
+        <p class="text-sm text-ink-soft">{{ m.parent.exploredHint }}</p>
+        <h3 class="mt-4 font-semibold text-ink">{{ m.parent.numbers }}</h3>
         <div class="mt-2 flex flex-wrap gap-1.5">
           <span v-for="n in NUMBERS" :key="n.value" class="relative flex h-10 w-10 items-center justify-center rounded-xl text-lg font-bold" :class="progress.learnedNumbers.includes(n.value) ? 'bg-sky text-ink' : 'bg-ink/5 text-ink/30'">
             {{ n.value }}<span v-if="progress.tracedNumbers.includes(n.value)" class="absolute -top-1 -right-1 text-xs">✏️</span>
           </span>
         </div>
-        <h3 class="mt-4 font-semibold text-ink">Letters</h3>
+        <h3 class="mt-4 font-semibold text-ink">{{ m.parent.letters }}</h3>
         <div class="mt-2 flex flex-wrap gap-1.5">
           <span v-for="l in LETTERS" :key="l.upper" class="relative flex h-10 w-10 items-center justify-center rounded-xl text-lg font-bold" :class="progress.learnedLetters.includes(l.upper) ? 'bg-bubblegum text-ink' : 'bg-ink/5 text-ink/30'">
             {{ l.upper }}<span v-if="progress.tracedLetters.includes(l.upper)" class="absolute -top-1 -right-1 text-xs">✏️</span>
           </span>
         </div>
-        <h3 class="mt-4 font-semibold text-ink">Colors &amp; shapes</h3>
+        <h3 class="mt-4 font-semibold text-ink">{{ m.parent.colorsShapes }}</h3>
         <div class="mt-2 flex flex-wrap items-center gap-2">
           <span v-for="c in COLORS" :key="c.id" class="h-9 w-9 rounded-full border-2" :class="progress.exploredColors.includes(c.id) ? 'border-ink/20' : 'border-transparent opacity-20'" :style="{ background: c.hex }" :title="c.name" />
           <span class="mx-2 h-6 w-px bg-ink/10" />
@@ -195,10 +206,10 @@ const timeAgo = (t: number) => {
       <div class="mt-6 grid gap-6 lg:grid-cols-[3fr_2fr]">
         <!-- activities -->
         <section class="overflow-x-auto rounded-3xl bg-white p-5 shadow-soft" aria-labelledby="act-h">
-          <h2 id="act-h" class="text-xl font-bold text-ink">Activities</h2>
+          <h2 id="act-h" class="text-xl font-bold text-ink">{{ m.parent.activities }}</h2>
           <table class="mt-3 w-full text-left text-sm">
             <thead class="text-ink-soft">
-              <tr><th class="py-2 font-semibold">Activity</th><th class="font-semibold">Played</th><th class="font-semibold">Finished</th><th class="font-semibold">Best ★</th><th class="font-semibold">Last</th></tr>
+              <tr><th class="py-2 font-semibold">{{ m.parent.colActivity }}</th><th class="font-semibold">{{ m.parent.colPlayed }}</th><th class="font-semibold">{{ m.parent.colFinished }}</th><th class="font-semibold">{{ m.parent.colBest }}</th><th class="font-semibold">{{ m.parent.colLast }}</th></tr>
             </thead>
             <tbody>
               <tr v-for="row in activityRows" :key="row.a.id" class="border-t border-ink/5" :class="row.r ? 'text-ink' : 'text-ink/40'">
@@ -214,7 +225,7 @@ const timeAgo = (t: number) => {
 
         <!-- history -->
         <section class="rounded-3xl bg-white p-5 shadow-soft" aria-labelledby="hist-h">
-          <h2 id="hist-h" class="text-xl font-bold text-ink">Recent sessions</h2>
+          <h2 id="hist-h" class="text-xl font-bold text-ink">{{ m.parent.recentSessions }}</h2>
           <ul v-if="recent.length" class="mt-3 space-y-2">
             <li v-for="h in recent" :key="h.at" class="flex items-center gap-3 rounded-2xl bg-cream px-3 py-2">
               <ObjectIcon :name="getActivity(h.activityId).icon" :size="28" decorative />
@@ -225,67 +236,88 @@ const timeAgo = (t: number) => {
               <span class="flex items-center gap-1 font-bold text-ink"><ObjectIcon name="star" :size="18" decorative />{{ h.stars }}</span>
             </li>
           </ul>
-          <p v-else class="mt-3 text-ink-soft">No finished activities yet.</p>
+          <p v-else class="mt-3 text-ink-soft">{{ m.parent.noSessions }}</p>
         </section>
       </div>
+
+      <!-- language -->
+      <section class="mt-6 rounded-3xl bg-white p-5 shadow-soft" aria-labelledby="lang-h">
+        <h2 id="lang-h" class="text-xl font-bold text-ink">{{ m.parent.language }}</h2>
+        <p class="text-sm text-ink-soft">{{ m.parent.languageHint }}</p>
+        <div class="mt-3 flex flex-wrap gap-3" role="radiogroup" :aria-labelledby="'lang-h'">
+          <button
+            v-for="l in locales"
+            :key="l.id"
+            type="button"
+            role="radio"
+            :aria-checked="locale === l.id"
+            :lang="l.tag"
+            class="rounded-full border-2 px-5 py-2 font-semibold transition-colors"
+            :class="locale === l.id ? 'border-mint-deep bg-mint text-ink' : 'border-ink/10 bg-cream text-ink-soft'"
+            @click="setLanguage(l.id)"
+          >
+            {{ l.name }}
+          </button>
+        </div>
+      </section>
 
       <!-- settings -->
       <section class="mt-6 grid gap-6 lg:grid-cols-2">
         <div class="rounded-3xl bg-white p-5 shadow-soft" aria-labelledby="snd-h">
-          <h2 id="snd-h" class="text-xl font-bold text-ink">Sound</h2>
+          <h2 id="snd-h" class="text-xl font-bold text-ink">{{ m.parent.sound }}</h2>
           <label class="mt-4 flex items-center justify-between gap-4">
-            <span class="font-semibold text-ink">Sound on</span>
+            <span class="font-semibold text-ink">{{ m.parent.soundOn }}</span>
             <input type="checkbox" class="h-6 w-6 accent-[#3FB5EA]" :checked="settings.soundEnabled" @change="update({ soundEnabled: ($event.target as HTMLInputElement).checked })" />
           </label>
           <label class="mt-4 block">
-            <span class="flex justify-between font-semibold text-ink"><span>Voice volume</span><span class="text-ink-soft">{{ Math.round(settings.voiceVolume * 100) }}%</span></span>
+            <span class="flex justify-between font-semibold text-ink"><span>{{ m.parent.voiceVolume }}</span><span class="text-ink-soft">{{ Math.round(settings.voiceVolume * 100) }}%</span></span>
             <input type="range" min="0" max="1" step="0.05" class="mt-1 w-full accent-[#3FB5EA]" :value="settings.voiceVolume" :disabled="!settings.soundEnabled" @input="update({ voiceVolume: Number(($event.target as HTMLInputElement).value) })" />
           </label>
           <label class="mt-4 block">
-            <span class="flex justify-between font-semibold text-ink"><span>Sound effects volume</span><span class="text-ink-soft">{{ Math.round(settings.effectsVolume * 100) }}%</span></span>
+            <span class="flex justify-between font-semibold text-ink"><span>{{ m.parent.effectsVolume }}</span><span class="text-ink-soft">{{ Math.round(settings.effectsVolume * 100) }}%</span></span>
             <input type="range" min="0" max="1" step="0.05" class="mt-1 w-full accent-[#3FB5EA]" :value="settings.effectsVolume" :disabled="!settings.soundEnabled" @input="update({ effectsVolume: Number(($event.target as HTMLInputElement).value) })" />
           </label>
           <label class="mt-4 flex items-center justify-between gap-4">
             <span>
-              <span class="block font-semibold text-ink">Speech fallback</span>
-              <span class="block text-sm text-ink-soft">Use the device voice if a recording is missing.</span>
+              <span class="block font-semibold text-ink">{{ m.parent.speechFallback }}</span>
+              <span class="block text-sm text-ink-soft">{{ m.parent.speechFallbackHint }}</span>
             </span>
             <input type="checkbox" class="h-6 w-6 accent-[#3FB5EA]" :checked="settings.speechFallback" @change="update({ speechFallback: ($event.target as HTMLInputElement).checked })" />
           </label>
-          <button type="button" class="mt-4 rounded-full bg-sky px-4 py-2 font-semibold text-ink" @click="testSound">Test sound</button>
+          <button type="button" class="mt-4 rounded-full bg-sky px-4 py-2 font-semibold text-ink" @click="testSound">{{ m.parent.testSound }}</button>
         </div>
 
         <div class="rounded-3xl bg-white p-5 shadow-soft" aria-labelledby="play-h">
-          <h2 id="play-h" class="text-xl font-bold text-ink">Play settings</h2>
+          <h2 id="play-h" class="text-xl font-bold text-ink">{{ m.parent.playSettings }}</h2>
           <div class="mt-4 flex items-center justify-between gap-4">
             <span>
-              <span class="block font-semibold text-ink">Questions per activity</span>
-              <span class="block text-sm text-ink-soft">Shorter sessions suit younger children.</span>
+              <span class="block font-semibold text-ink">{{ m.parent.questionsPerActivity }}</span>
+              <span class="block text-sm text-ink-soft">{{ m.parent.questionsHint }}</span>
             </span>
             <div class="flex items-center gap-2">
-              <button type="button" class="h-10 w-10 rounded-full bg-cream text-xl font-bold" aria-label="Fewer questions" @click="update({ roundsPerActivity: settings.roundsPerActivity - 1 })">−</button>
+              <button type="button" class="h-10 w-10 rounded-full bg-cream text-xl font-bold" :aria-label="m.parent.fewerQuestions" @click="update({ roundsPerActivity: settings.roundsPerActivity - 1 })">−</button>
               <span class="w-6 text-center text-xl font-bold">{{ settings.roundsPerActivity }}</span>
-              <button type="button" class="h-10 w-10 rounded-full bg-cream text-xl font-bold" aria-label="More questions" @click="update({ roundsPerActivity: settings.roundsPerActivity + 1 })">+</button>
+              <button type="button" class="h-10 w-10 rounded-full bg-cream text-xl font-bold" :aria-label="m.parent.moreQuestions" @click="update({ roundsPerActivity: settings.roundsPerActivity + 1 })">+</button>
             </div>
           </div>
           <label class="mt-4 flex items-center justify-between gap-4">
             <span>
-              <span class="block font-semibold text-ink">Reduce motion</span>
-              <span class="block text-sm text-ink-soft">"Auto" follows the device setting.</span>
+              <span class="block font-semibold text-ink">{{ m.parent.reduceMotion }}</span>
+              <span class="block text-sm text-ink-soft">{{ m.parent.reduceMotionHint }}</span>
             </span>
             <select class="rounded-xl border-2 border-ink/10 bg-cream px-3 py-2 font-semibold" :value="settings.reducedMotion" @change="update({ reducedMotion: ($event.target as HTMLSelectElement).value as 'auto' | 'on' | 'off' })">
-              <option value="auto">Auto</option>
-              <option value="on">On</option>
-              <option value="off">Off</option>
+              <option value="auto">{{ m.parent.motionAuto }}</option>
+              <option value="on">{{ m.parent.motionOn }}</option>
+              <option value="off">{{ m.parent.motionOff }}</option>
             </select>
           </label>
           <div class="mt-5 border-t border-ink/5 pt-4">
-            <span class="block font-semibold text-ink">Parent PIN</span>
-            <span class="block text-sm text-ink-soft">{{ settings.parentPin ? 'A PIN is set.' : 'No PIN set — a grown-up math question protects this area.' }}</span>
+            <span class="block font-semibold text-ink">{{ m.parent.parentPin }}</span>
+            <span class="block text-sm text-ink-soft">{{ settings.parentPin ? m.parent.pinSet : m.parent.noPin }}</span>
             <div class="mt-2 flex flex-wrap gap-2">
-              <input v-model="pinDraft" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="4 digits" aria-label="New PIN" class="w-32 rounded-xl border-2 border-ink/10 px-3 py-2 text-lg tracking-widest" />
-              <button type="button" class="rounded-full bg-mint px-4 py-2 font-semibold text-ink" @click="savePin">Save PIN</button>
-              <button v-if="settings.parentPin" type="button" class="rounded-full bg-cream px-4 py-2 font-semibold text-ink" @click="clearPin">Remove PIN</button>
+              <input v-model="pinDraft" inputmode="numeric" maxlength="4" pattern="\d{4}" :placeholder="m.parent.pinPlaceholder" :aria-label="m.parent.newPin" class="w-32 rounded-xl border-2 border-ink/10 px-3 py-2 text-lg tracking-widest" />
+              <button type="button" class="rounded-full bg-mint px-4 py-2 font-semibold text-ink" @click="savePin">{{ m.parent.savePin }}</button>
+              <button v-if="settings.parentPin" type="button" class="rounded-full bg-cream px-4 py-2 font-semibold text-ink" @click="clearPin">{{ m.parent.removePin }}</button>
             </div>
             <p v-if="pinMessage" class="mt-2 text-sm text-ink-soft" role="status">{{ pinMessage }}</p>
           </div>
@@ -294,23 +326,23 @@ const timeAgo = (t: number) => {
 
       <!-- data -->
       <section class="mt-6 rounded-3xl bg-white p-5 shadow-soft" aria-labelledby="data-h">
-        <h2 id="data-h" class="text-xl font-bold text-ink">Data</h2>
-        <p class="text-sm text-ink-soft">Progress is saved in this browser only. Nothing is sent anywhere.</p>
+        <h2 id="data-h" class="text-xl font-bold text-ink">{{ m.parent.data }}</h2>
+        <p class="text-sm text-ink-soft">{{ m.parent.dataHint }}</p>
         <div class="mt-3 flex flex-wrap gap-3">
-          <button type="button" class="rounded-full bg-sky px-4 py-2 font-semibold text-ink" @click="exportData">Download progress (JSON)</button>
-          <button v-if="!confirmReset" type="button" class="rounded-full bg-bubblegum px-4 py-2 font-semibold text-ink" @click="confirmReset = true">Reset progress…</button>
+          <button type="button" class="rounded-full bg-sky px-4 py-2 font-semibold text-ink" @click="exportData">{{ m.parent.download }}</button>
+          <button v-if="!confirmReset" type="button" class="rounded-full bg-bubblegum px-4 py-2 font-semibold text-ink" @click="confirmReset = true">{{ m.parent.reset }}</button>
           <div v-else class="flex flex-wrap items-center gap-2 rounded-2xl bg-bubblegum/30 px-4 py-2" role="alert">
-            <span class="font-semibold text-ink">Erase all stars, badges, dino friends and history? This cannot be undone.</span>
-            <button type="button" class="rounded-full bg-bubblegum-deep px-4 py-2 font-bold text-white" @click="doReset">Yes, reset</button>
-            <button type="button" class="rounded-full bg-white px-4 py-2 font-semibold text-ink" @click="confirmReset = false">Cancel</button>
+            <span class="font-semibold text-ink">{{ m.parent.resetConfirm }}</span>
+            <button type="button" class="rounded-full bg-bubblegum-deep px-4 py-2 font-bold text-white" @click="doReset">{{ m.parent.resetYes }}</button>
+            <button type="button" class="rounded-full bg-white px-4 py-2 font-semibold text-ink" @click="confirmReset = false">{{ m.parent.cancel }}</button>
           </div>
-          <span v-if="resetDone" class="self-center font-semibold text-mint-deep" role="status">Progress reset.</span>
+          <span v-if="resetDone" class="self-center font-semibold text-mint-deep" role="status">{{ m.parent.resetDone }}</span>
         </div>
       </section>
 
-      <section class="mt-6 text-sm text-ink-soft" aria-label="Credits">
-        <p>Illustrations: Twemoji by Twitter, Inc. and contributors, licensed CC-BY 4.0. Dino, monster, scenes and UI art are original to DinoLand.</p>
-        <p>Voice clips are development recordings; replace files in <code>public/audio/voice/</code> to use a professional voice-over.</p>
+      <section class="mt-6 text-sm text-ink-soft" :aria-label="m.parent.credits">
+        <p>{{ m.parent.creditsArt }}</p>
+        <p>{{ m.parent.creditsVoice }}</p>
       </section>
     </div>
   </div>

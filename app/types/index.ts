@@ -146,6 +146,8 @@ export interface SettingsState {
   parentPin: string
   /** Number of rounds per activity. */
   roundsPerActivity: number
+  /** Language for voice, words and screens. */
+  language: import('../locales/index.ts').Locale
 }
 
 export interface RewardsState {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /** Stars that pop in one after another with a sparkle sound. */
+const { m } = useI18n()
 const props = withDefaults(defineProps<{ count: number; size?: number; max?: number }>(), { size: 64, max: 10 })
 const audio = useAudio()
 const shown = computed(() => Math.min(props.count, props.max))
@@ -10,7 +11,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center justify-center gap-1" :aria-label="`${count} stars`">
+  <div class="flex flex-wrap items-center justify-center gap-1" :aria-label="m.common.stars(count)">
     <Motion
       v-for="i in shown"
       :key="i"

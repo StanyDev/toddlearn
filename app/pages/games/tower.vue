@@ -2,6 +2,7 @@
 import { randInt } from '~/utils/random'
 
 /** Stack exactly N blocks — Dino counts each one out loud. */
+const { m } = useI18n()
 const audio = useAudio()
 const BLOCK_COLORS = ['#FF7FA1', '#3FB5EA', '#F6C94A', '#5CCB9F', '#A78BFA', '#FF9F5A']
 
@@ -46,10 +47,10 @@ const blockSize = computed(() => (target.value > 6 ? 'h-[min(7vh,56px)]' : 'h-[m
     <div class="flex w-full max-w-5xl flex-col items-center gap-4 sm:flex-row sm:items-end sm:justify-center sm:gap-10">
       <!-- goal + counter -->
       <div class="flex flex-row items-center gap-4 sm:flex-col">
-        <button type="button" class="toy flex flex-col items-center gap-1 bg-white px-6 py-4" aria-label="Hear how many blocks" @click="game.replayInstruction()">
-          <span class="text-xl font-bold text-ink-soft">Build</span>
+        <button type="button" class="toy flex flex-col items-center gap-1 bg-white px-6 py-4" :aria-label="m.games.hearHowManyBlocks" @click="game.replayInstruction()">
+          <span class="text-xl font-bold text-ink-soft">{{ m.games.build }}</span>
           <BigGlyph :value="target" size="5rem" />
-          <span class="text-xl font-bold text-ink-soft">blocks</span>
+          <span class="text-xl font-bold text-ink-soft">{{ m.games.blocks }}</span>
         </button>
         <div class="flex items-center gap-2 rounded-full bg-white/80 px-5 py-2 text-3xl font-bold text-ink" aria-live="polite">
           <ObjectIcon name="bricks" :size="36" decorative />
@@ -58,7 +59,7 @@ const blockSize = computed(() => (target.value > 6 ? 'h-[min(7vh,56px)]' : 'h-[m
       </div>
 
       <!-- tower -->
-      <div class="relative flex w-[min(60vw,260px)] flex-col-reverse items-center" aria-label="Tower">
+      <div class="relative flex w-[min(60vw,260px)] flex-col-reverse items-center" :aria-label="m.games.tower">
         <div class="h-5 w-[130%] rounded-full bg-[#7FD8B0]" aria-hidden="true" />
         <!-- ghost slots show how tall the tower should be -->
         <div class="absolute bottom-5 flex w-full flex-col-reverse" aria-hidden="true">
@@ -77,7 +78,7 @@ const blockSize = computed(() => (target.value > 6 ? 'h-[min(7vh,56px)]' : 'h-[m
           :initial="{ y: -360, rotate: i % 2 ? 6 : -6 }"
           :animate="{ y: 0, rotate: 0 }"
           :transition="{ type: 'spring', stiffness: 380, damping: 18 }"
-          :aria-label="i === blocks.length - 1 ? `Block ${i + 1}, tap to take it off` : `Block ${i + 1}`"
+          :aria-label="i === blocks.length - 1 ? m.games.blockTakeOff(i + 1) : m.games.block(i + 1)"
           @click="i === blocks.length - 1 && removeTop()"
         >
           <span class="h-3 w-3 rounded-full bg-white/50" />
@@ -87,14 +88,14 @@ const blockSize = computed(() => (target.value > 6 ? 'h-[min(7vh,56px)]' : 'h-[m
       </div>
 
       <!-- block pile -->
-      <div class="grid grid-cols-3 gap-3 rounded-[2rem] bg-white/70 p-4" aria-label="Blocks to stack">
+      <div class="grid grid-cols-3 gap-3 rounded-[2rem] bg-white/70 p-4" :aria-label="m.games.blocksToStack">
         <button
           v-for="c in BLOCK_COLORS"
           :key="c"
           type="button"
           class="toy h-20 w-20 sm:h-24 sm:w-24"
           :style="{ background: c }"
-          aria-label="Add a block"
+          :aria-label="m.games.addBlock"
           :disabled="blocks.length >= target"
           @click="addBlock(c)"
         >

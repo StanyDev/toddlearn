@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import type { FeedbackState } from '~/types'
+const { m } = useI18n()
 
 /** Dino pops up to cheer (correct) or gently encourage (try again). */
 const props = defineProps<{ state: FeedbackState; celebrateKey: number }>()
 
-const PRAISE = ['Great job!', 'You did it!', 'Awesome!', 'Super star!', 'Well done!', 'Wow!']
-const ENCOURAGE = ['Try again!', 'Almost!', 'You can do it!', 'One more try!']
 const text = ref('')
 watch(
   () => props.state,
   (s) => {
-    if (s === 'correct') text.value = PRAISE[Math.floor(Math.random() * PRAISE.length)]!
-    if (s === 'tryAgain') text.value = ENCOURAGE[Math.floor(Math.random() * ENCOURAGE.length)]!
+    const { praise, encourage } = m.value.feedback
+    if (s === 'correct') text.value = praise[Math.floor(Math.random() * praise.length)]!
+    if (s === 'tryAgain') text.value = encourage[Math.floor(Math.random() * encourage.length)]!
   },
 )
 </script>

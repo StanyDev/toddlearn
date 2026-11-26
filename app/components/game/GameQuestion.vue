@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ChoiceVisual, PromptVisual } from '~/types'
+const { m } = useI18n()
 
 /**
  * Instruction line (tap to hear again) + the question's main visual.
@@ -14,7 +15,7 @@ function replay() {
 
 <template>
   <div class="flex w-full flex-col items-center gap-5">
-    <button type="button" class="toy flex min-h-20 items-center gap-3 bg-white py-2 pr-6 pl-3" aria-label="Hear the question" @click="replay">
+    <button type="button" class="toy flex min-h-20 items-center gap-3 bg-white py-2 pr-6 pl-3" :aria-label="m.common.hearQuestion" @click="replay">
       <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-sky-deep text-white" :class="{ 'animate-pulse': audio.speaking.value }">
         <svg viewBox="0 0 48 48" class="h-8 w-8" aria-hidden="true">
           <path d="M8 18 H16 L27 9 V39 L16 30 H8 Z" fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />

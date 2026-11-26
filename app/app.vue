@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { localeInfo } from '~/locales'
+
 const { settings } = useSettings()
+// <html lang> follows the chosen language (screen readers, hyphenation).
+useHead({ htmlAttrs: { lang: () => localeInfo(settings.value.language).tag } })
 const reducedMotion = computed(() => (settings.value.reducedMotion === 'on' ? 'always' : settings.value.reducedMotion === 'off' ? 'never' : 'user'))
 </script>
 

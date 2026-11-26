@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { DecorationId } from '~/types'
 import { ACHIEVEMENTS, DECORATIONS, DINOS } from '~/data/rewards'
+const { m } = useI18n()
 
-useHead({ title: 'My Rewards · DinoLand' })
+useHead({ title: () => `${m.value.rewards.title} · DinoLand` })
 const audio = useAudio()
 const { progress } = useProgress()
 const rewards = useRewards()
@@ -39,8 +40,8 @@ onMounted(() => {
     <div class="pointer-events-none absolute inset-0 dots-bg" aria-hidden="true" />
     <CelebrationAnimation :trigger="cheer" :pieces="24" origin="top" />
     <header class="relative flex items-center gap-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-      <BackButton to="/" icon="home" label="Home" />
-      <h1 class="flex-1 text-3xl font-bold text-ink sm:text-4xl">My Rewards</h1>
+      <BackButton to="/" icon="home" :label="m.common.home" />
+      <h1 class="flex-1 text-3xl font-bold text-ink sm:text-4xl">{{ m.rewards.title }}</h1>
     </header>
 
     <!-- star hero -->
@@ -53,17 +54,17 @@ onMounted(() => {
           <ObjectIcon name="star" :size="72" class="animate-twinkle" />
           <span class="text-7xl font-bold text-ink tabular-nums">{{ stars }}</span>
         </div>
-        <p class="text-2xl font-semibold text-ink-soft">stars collected!</p>
+        <p class="text-2xl font-semibold text-ink-soft">{{ m.rewards.starsCollected }}</p>
         <p v-if="rewards.nextUnlock.value" class="flex items-center gap-2 rounded-full bg-sunny/50 px-4 py-2 text-lg font-semibold text-ink">
           <ObjectIcon name="gift" :size="28" decorative />
-          {{ rewards.nextUnlock.value.starsNeeded - stars }} more stars for {{ rewards.nextUnlock.value.name }}
+          {{ m.rewards.moreStarsFor(rewards.nextUnlock.value.starsNeeded - stars, rewards.nextUnlock.value.name) }}
         </p>
       </div>
     </section>
 
     <!-- dino friends -->
     <section class="relative mx-auto mt-6 max-w-5xl" aria-labelledby="friends">
-      <h2 id="friends" class="mb-3 text-2xl font-bold text-ink">Dino Friends</h2>
+      <h2 id="friends" class="mb-3 text-2xl font-bold text-ink">{{ m.rewards.friends }}</h2>
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
         <button
           v-for="d in DINOS"
@@ -71,7 +72,7 @@ onMounted(() => {
           type="button"
           class="toy relative flex flex-col items-center gap-1 bg-white p-3"
           :class="r.activeDino === d.id ? 'ring-8 ring-mint-deep' : ''"
-          :aria-label="r.unlockedDinos.includes(d.id) ? `Play with ${d.name}` : `${d.name} — needs ${d.starsNeeded} stars`"
+          :aria-label="r.unlockedDinos.includes(d.id) ? m.rewards.playWith(d.name) : m.rewards.needs(d.name, d.starsNeeded)"
           :aria-pressed="r.activeDino === d.id"
           @click="chooseDino(d.id)"
         >
@@ -86,7 +87,7 @@ onMounted(() => {
 
     <!-- decorations -->
     <section class="relative mx-auto mt-6 max-w-5xl" aria-labelledby="dressup">
-      <h2 id="dressup" class="mb-3 text-2xl font-bold text-ink">Dress Up</h2>
+      <h2 id="dressup" class="mb-3 text-2xl font-bold text-ink">{{ m.rewards.dressUp }}</h2>
       <div class="grid grid-cols-3 gap-4 sm:grid-cols-6">
         <button
           v-for="d in DECORATIONS"
@@ -94,7 +95,7 @@ onMounted(() => {
           type="button"
           class="toy relative flex flex-col items-center gap-1 bg-white p-3"
           :class="r.activeDecoration === d.id ? 'ring-8 ring-bubblegum-deep' : ''"
-          :aria-label="r.unlockedDecorations.includes(d.id) ? `Wear the ${d.name}` : `${d.name} — needs ${d.starsNeeded} stars`"
+          :aria-label="r.unlockedDecorations.includes(d.id) ? m.rewards.wear(d.name) : m.rewards.needs(d.name, d.starsNeeded)"
           :aria-pressed="r.activeDecoration === d.id"
           @click="chooseDecoration(d.id)"
         >
@@ -111,7 +112,7 @@ onMounted(() => {
 
     <!-- badges -->
     <section class="relative mx-auto mt-6 max-w-5xl" aria-labelledby="badges">
-      <h2 id="badges" class="mb-3 text-2xl font-bold text-ink">Badges</h2>
+      <h2 id="badges" class="mb-3 text-2xl font-bold text-ink">{{ m.rewards.badges }}</h2>
       <div class="grid grid-cols-2 gap-6 rounded-[2.5rem] bg-white/80 p-6 sm:grid-cols-4 lg:grid-cols-6">
         <AchievementBadge v-for="b in ACHIEVEMENTS" :key="b.id" :badge="b" :unlocked="!!r.unlockedAchievements[b.id]" :progress="b.progress(progress)" :size="104" />
       </div>

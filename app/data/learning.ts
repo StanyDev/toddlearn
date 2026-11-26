@@ -1,4 +1,6 @@
 import type { ColorId, ColorInfo, LetterInfo, NumberInfo, ShapeId, ShapeInfo } from '../types'
+import { localize } from '../locales/index.ts'
+import { ID_COLORS, ID_LETTERS, ID_NUMBERS, ID_OBJECTS, ID_SHAPES } from '../locales/id.ts'
 
 export const NUMBERS: NumberInfo[] = [
   { value: 1, name: 'One', object: 'sun', plural: 'sun' },
@@ -72,6 +74,17 @@ export const SHAPES: ShapeInfo[] = [
   { id: 'star', name: 'Star', objects: ['star', 'glowing-star'] },
   { id: 'heart', name: 'Heart', objects: ['heart', 'love-letter', 'heart-gift'] },
 ]
+
+/*
+ * Names, words and pictures follow the current language. In Indonesian the
+ * letter words change ("B untuk Bola"), so a letter's picture can change too.
+ */
+localize(NUMBERS, 'name', { id: (n) => ID_NUMBERS[n.value] })
+localize(NUMBERS, 'plural', { id: (n) => ID_OBJECTS[n.object]?.toLowerCase() })
+localize(LETTERS, 'word', { id: (l) => ID_LETTERS[l.lower]?.word })
+localize(LETTERS, 'object', { id: (l) => ID_LETTERS[l.lower]?.object })
+localize(COLORS, 'name', { id: (c) => ID_COLORS[c.id] })
+localize(SHAPES, 'name', { id: (s) => ID_SHAPES[s.id] })
 
 /** Default fill colours used when drawing a shape without a specific colour. */
 export const SHAPE_COLORS: Record<ShapeId, string> = {

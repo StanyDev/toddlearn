@@ -5,6 +5,7 @@ import { randInt } from '~/utils/random'
  * Grown-up check: a multiplication question (or the parent's PIN if one is
  * set) typed on a keypad. Easy for adults, unlikely for a toddler to guess.
  */
+const { m } = useI18n()
 const emit = defineEmits<{ unlock: [] }>()
 const { settings } = useSettings()
 const usePin = computed(() => settings.value.parentPin.length === 4)
@@ -44,10 +45,10 @@ function check() {
 <template>
   <div class="mx-auto flex w-full max-w-sm flex-col items-center gap-5 rounded-[2rem] bg-white p-6 shadow-soft">
     <ObjectIcon name="lock" :size="56" />
-    <h1 class="text-2xl font-bold text-ink">For grown-ups</h1>
+    <h1 class="text-2xl font-bold text-ink">{{ m.gate.title }}</h1>
     <p class="text-center text-base text-ink-soft">
-      <template v-if="usePin">Enter your 4-digit parent PIN.</template>
-      <template v-else>To continue, answer: <strong class="text-ink">{{ a }} × {{ b }} = ?</strong></template>
+      <template v-if="usePin">{{ m.gate.enterPin }}</template>
+      <template v-else>{{ m.gate.answer }} <strong class="text-ink">{{ a }} × {{ b }} = ?</strong></template>
     </p>
     <div class="flex gap-2" :class="{ 'animate-wiggle': error }" aria-live="polite">
       <span
@@ -58,11 +59,11 @@ function check() {
         >{{ usePin ? (entry[i - 1] ? '•' : '') : (entry[i - 1] ?? '') }}</span
       >
     </div>
-    <div class="grid grid-cols-3 gap-2" role="group" aria-label="Keypad">
+    <div class="grid grid-cols-3 gap-2" role="group" :aria-label="m.gate.keypad">
       <button v-for="d in ['1', '2', '3', '4', '5', '6', '7', '8', '9']" :key="d" type="button" class="h-14 w-16 rounded-xl bg-cream text-xl font-bold text-ink active:bg-sky/50" @click="press(d)">{{ d }}</button>
-      <button type="button" class="h-14 w-16 rounded-xl bg-cream text-base font-semibold text-ink-soft" aria-label="Delete" @click="back">⌫</button>
+      <button type="button" class="h-14 w-16 rounded-xl bg-cream text-base font-semibold text-ink-soft" :aria-label="m.gate.delete" @click="back">⌫</button>
       <button type="button" class="h-14 w-16 rounded-xl bg-cream text-xl font-bold text-ink active:bg-sky/50" @click="press('0')">0</button>
-      <NuxtLink to="/" class="flex h-14 w-16 items-center justify-center rounded-xl bg-cream text-sm font-semibold text-ink-soft" aria-label="Back to DinoLand">Exit</NuxtLink>
+      <NuxtLink to="/" class="flex h-14 w-16 items-center justify-center rounded-xl bg-cream text-sm font-semibold text-ink-soft" :aria-label="m.gate.backToApp">{{ m.gate.exit }}</NuxtLink>
     </div>
   </div>
 </template>

@@ -1,5 +1,6 @@
 import type { ActivityId, Choice, ColorId, MatchRound, QuizQuestion, ShapeId } from '~/types'
 import { COLORS, LETTERS, NUMBERS, SHAPES, SHAPE_COLORS, colorById, letterInfo, numberInfo } from '~/data/learning'
+import { messages } from '~/composables/useI18n'
 import { distractors, nearbyNumbers, pick, pickFresh, randInt, sample, shuffle } from '~/utils/random'
 
 /**
@@ -30,7 +31,7 @@ const countObjects: Generator = (round, recent) => {
   const object = pick(COUNTABLES)
   const options = shuffle([n, ...nearbyNumbers(n, 2, 1, Math.max(max, n + 2))])
   return {
-    text: 'How many?',
+    text: messages().quiz.howMany,
     voice: ['how-many'],
     prompt: { kind: 'group', object, count: n },
     choices: options.map(numChoice),
@@ -44,7 +45,7 @@ const findNumber: Generator = (round, recent) => {
   const count = round < 2 ? 3 : 4
   const options = shuffle([n, ...nearbyNumbers(n, count - 1, 1, max, 5)])
   return {
-    text: 'Find',
+    text: messages().quiz.find,
     hint: { kind: 'group', object: numberInfo(n).object, count: n },
     voice: ['find-the-number', `numbers/${n}`],
     prompt: { kind: 'none' },
@@ -66,7 +67,7 @@ const missingNumber: Generator = (round) => {
     if (!options.includes(x) && !seq.includes(x)) options.push(x)
   }
   return {
-    text: 'What is missing?',
+    text: messages().quiz.whatMissing,
     voice: ['which-missing-number'],
     prompt: { kind: 'sequence', items: seq.map((x, i) => (i === hole ? null : String(x))) },
     choices: shuffle(options).map(numChoice),
@@ -86,7 +87,7 @@ const moreOrLess: Generator = (round) => {
   const object = pick(COUNTABLES)
   const answer = askMore ? (a > b ? 'a' : 'b') : a < b ? 'a' : 'b'
   return {
-    text: askMore ? 'Which has more?' : 'Which has less?',
+    text: askMore ? messages().quiz.whichMore : messages().quiz.whichLess,
     voice: [askMore ? 'which-more' : 'which-less'],
     prompt: { kind: 'none' },
     layout: 'pair',
@@ -102,7 +103,7 @@ const matchNumbers: MatchGenerator = (round) => {
   const pool = round < 2 ? [1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   const nums = sample(pool, 3)
   return {
-    text: 'Match!',
+    text: messages().quiz.match,
     voice: ['match-numbers'],
     pairs: nums.map((n) => ({
       id: String(n),
@@ -120,7 +121,7 @@ const findLetter: Generator = (round, recent) => {
   const count = round < 2 ? 3 : 4
   const options = shuffle([l, ...distractors(ALL_LETTERS, l, count - 1)])
   return {
-    text: 'Find',
+    text: messages().quiz.find,
     hint: { kind: 'object', key: letterInfo(l).object },
     voice: ['find-the-letter', `letters/${l.toLowerCase()}`],
     prompt: { kind: 'none' },
@@ -137,7 +138,7 @@ const missingLetter: Generator = (round) => {
   const answer = seq[hole]!
   const options = shuffle([answer, ...distractors(ALL_LETTERS.filter((x) => !seq.includes(x)), answer, 2)])
   return {
-    text: 'What is missing?',
+    text: messages().quiz.whatMissing,
     voice: ['which-missing-letter'],
     prompt: { kind: 'sequence', items: seq.map((x, i) => (i === hole ? null : x)) },
     choices: options.map((x) => letterChoice(x)),
@@ -148,7 +149,7 @@ const missingLetter: Generator = (round) => {
 const matchCase: MatchGenerator = (round) => {
   const letters = sample(round < 2 ? ALL_LETTERS.slice(0, 10) : ALL_LETTERS, 3)
   return {
-    text: 'Big & little',
+    text: messages().quiz.bigLittle,
     voice: ['match-case'],
     pairs: letters.map((l) => ({
       id: l,
@@ -162,7 +163,7 @@ const matchCase: MatchGenerator = (round) => {
 const matchPicture: MatchGenerator = () => {
   const letters = sample(ALL_LETTERS, 3)
   return {
-    text: 'Letter & picture',
+    text: messages().quiz.letterPicture,
     voice: ['match-picture'],
     pairs: letters.map((l) => ({
       id: l,
@@ -182,7 +183,7 @@ const findColor: Generator = (round, recent) => {
   const c = pickFresh(pool, recent as ColorId[])
   const options = shuffle([c, ...distractors(pool, c, round < 2 ? 2 : 3)])
   return {
-    text: 'Find',
+    text: messages().quiz.find,
     hint: { kind: 'object', key: colorById(c).objects[0]! },
     voice: ['can-you-find', `colors/${c}`],
     prompt: { kind: 'none' },
@@ -196,7 +197,7 @@ const colorHunt: Generator = (_round, recent) => {
   const others = distractors(ALL_COLORS, c, 2)
   const options = shuffle([c, ...others]).map((color) => ({ color, object: pick(colorById(color).objects) }))
   return {
-    text: 'Find something',
+    text: messages().quiz.findSomething,
     hint: { kind: 'color', color: c },
     voice: ['find-something', `colors/${c}`],
     prompt: { kind: 'none' },
@@ -208,7 +209,7 @@ const colorHunt: Generator = (_round, recent) => {
 const matchColors: MatchGenerator = () => {
   const colors = sample(ALL_COLORS, 3)
   return {
-    text: 'Match colors',
+    text: messages().quiz.matchColors,
     voice: ['match-colors'],
     pairs: colors.map((c) => ({
       id: c,
@@ -224,7 +225,7 @@ const findShape: Generator = (round, recent) => {
   const s = pickFresh(pool, recent as ShapeId[])
   const options = shuffle([s, ...distractors(pool, s, round < 2 ? 2 : 3)])
   return {
-    text: 'Find',
+    text: messages().quiz.find,
     hint: { kind: 'object', key: SHAPES.find((x) => x.id === s)!.objects[0]! },
     voice: ['find-the', `shapes/${s}`],
     prompt: { kind: 'none' },
@@ -236,7 +237,7 @@ const findShape: Generator = (round, recent) => {
 const matchShapes: MatchGenerator = () => {
   const shapes = sample(ALL_SHAPES, 3)
   return {
-    text: 'Match shapes',
+    text: messages().quiz.matchShapes,
     voice: ['match-shapes'],
     pairs: shapes.map((s) => ({
       id: s,

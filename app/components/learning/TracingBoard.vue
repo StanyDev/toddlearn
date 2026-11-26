@@ -8,6 +8,7 @@ import { GLYPH_HEIGHT, GLYPH_STROKES, GLYPH_WIDTH } from '~/data/glyphs'
  * pulsing dot and follow the path in order; the stroke fills with colour as
  * they go. Generous hit radius, no failing — lifting the finger keeps progress.
  */
+const { m } = useI18n()
 const props = withDefaults(defineProps<{ glyphs: string[]; color?: string }>(), { color: '#FF7FA1' })
 const emit = defineEmits<{ complete: []; stroke: [index: number] }>()
 const audio = useAudio()
@@ -140,7 +141,7 @@ function finishStroke() {
       :viewBox="viewBox"
       class="h-full max-h-[calc(100dvh-12rem)] w-full touch-none rounded-[2.5rem] bg-white shadow-soft"
       role="img"
-      :aria-label="`Trace ${glyphs.join(' and ')}`"
+      :aria-label="m.common.trace(glyphs.join(` ${m.common.and} `))"
       @pointerdown="down"
       @pointermove="move"
       @pointerup="up"

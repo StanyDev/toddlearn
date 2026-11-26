@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { getObject } from '~/data/objects'
+
 /**
  * Shows `count` copies of an object in tidy rows of five (like a ten-frame).
  * With `countable`, children tap each object to count it out loud.
  */
+const { m } = useI18n()
 const props = withDefaults(
   defineProps<{ object: string; count: number; size?: number; countable?: boolean; perRow?: number }>(),
   { size: undefined, countable: false, perRow: 5 },
@@ -30,11 +33,12 @@ function tap(i: number) {
   emit('counted', n)
   if (n === props.count) emit('complete')
 }
+const label = computed(() => getObject(props.object).label)
 const badgeFor = (i: number) => counted.value.indexOf(i) + 1
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-1.5" :aria-label="`${count} ${object}`">
+  <div class="flex flex-col items-center gap-1.5" :aria-label="m.common.count(count, label)">
     <div v-for="(row, r) in rows" :key="r" class="flex justify-center gap-1.5">
       <component
         :is="countable ? 'button' : 'span'"
@@ -44,7 +48,7 @@ const badgeFor = (i: number) => counted.value.indexOf(i) + 1
         class="relative flex items-center justify-center rounded-2xl transition-transform"
         :class="[countable ? 'active:scale-90' : '', countable && badgeFor(i) ? 'bg-white/70' : '']"
         :style="{ width: `${autoSize + 8}px`, height: `${autoSize + 8}px` }"
-        :aria-label="countable ? `Count ${object}` : undefined"
+        :aria-label="countable ? m.common.countThis(label) : undefined"
         @click="tap(i)"
       >
         <Motion

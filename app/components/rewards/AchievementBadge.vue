@@ -3,6 +3,7 @@ import type { AchievementDef } from '~/types'
 import { THEME } from '~/utils/theme'
 
 /** Round badge with a progress ring; locked badges show how close they are. */
+const { m } = useI18n()
 const props = withDefaults(defineProps<{ badge: AchievementDef; unlocked: boolean; progress: number; size?: number; showLabel?: boolean }>(), {
   size: 112,
   showLabel: true,
@@ -13,7 +14,7 @@ const C = 2 * Math.PI * R
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-2 text-center" :aria-label="`${badge.title}: ${unlocked ? 'unlocked' : `${Math.round(progress * 100)} percent`}`">
+  <div class="flex flex-col items-center gap-2 text-center" :aria-label="`${badge.title}: ${unlocked ? m.rewards.unlocked : m.rewards.percent(Math.round(progress * 100))}`">
     <div class="relative" :style="{ width: `${size}px`, height: `${size}px` }">
       <svg viewBox="0 0 100 100" class="absolute inset-0 -rotate-90" aria-hidden="true">
         <circle cx="50" cy="50" :r="R" fill="none" stroke="#fff" stroke-width="7" />

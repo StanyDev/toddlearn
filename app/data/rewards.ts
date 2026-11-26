@@ -1,5 +1,7 @@
 import type { AchievementDef, ActivityId, DecorationDef, DinoDef, ProgressState } from '../types'
 import { COUNTING_ACTIVITIES, GAME_ACTIVITIES, TRACING_ACTIVITIES } from './activities.ts'
+import { localize } from '../locales/index.ts'
+import { ID_ACHIEVEMENTS, ID_DECORATIONS } from '../locales/id.ts'
 
 const completions = (p: ProgressState, ids: ActivityId[]) => ids.reduce((sum, id) => sum + (p.activities[id]?.completed ?? 0), 0)
 const totalCompletions = (p: ProgressState) => Object.values(p.activities).reduce((s, a) => s + (a?.completed ?? 0), 0)
@@ -38,5 +40,9 @@ export const DECORATIONS: DecorationDef[] = [
   { id: 'scarf', name: 'Scarf', starsNeeded: 85 },
   { id: 'crown', name: 'Crown', starsNeeded: 120 },
 ]
+
+localize(ACHIEVEMENTS, 'title', { id: (a) => ID_ACHIEVEMENTS[a.id]?.title })
+localize(ACHIEVEMENTS, 'description', { id: (a) => ID_ACHIEVEMENTS[a.id]?.description })
+localize(DECORATIONS, 'name', { id: (d) => ID_DECORATIONS[d.id] })
 
 export const dinoById = (id: string) => DINOS.find((d) => d.id === id) ?? DINOS[0]!

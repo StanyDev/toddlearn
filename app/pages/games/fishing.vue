@@ -3,6 +3,7 @@ import { LETTERS } from '~/data/learning'
 import { sample, shuffle } from '~/utils/random'
 
 /** Catch the fish wearing the letter Dino asks for. */
+const { m } = useI18n()
 const audio = useAudio()
 const FISH_COLORS = [
   ['#FFB547', '#FF8A3D'],
@@ -69,7 +70,7 @@ function tap(f: Fish, e: MouseEvent) {
 <template>
   <GameShell :game="game" activity-id="game-fishing" bg="bg-gradient-to-b from-sky/60 to-cream">
     <div class="flex w-full max-w-5xl flex-1 flex-col items-center gap-4">
-      <GameQuestion text="Catch" :voice="target ? ['catch-fish', `letters/${target.letter.toLowerCase()}`] : []" :hint="target ? { kind: 'letter', value: target.letter } : undefined" />
+      <GameQuestion :text="m.quiz.catch" :voice="target ? ['catch-fish', `letters/${target.letter.toLowerCase()}`] : []" :hint="target ? { kind: 'letter', value: target.letter } : undefined" />
 
       <div class="relative w-full">
         <!-- dock with Dino fishing -->
@@ -103,7 +104,7 @@ function tap(f: Fish, e: MouseEvent) {
                 ? { left: `${caught.x}px`, top: `${caught.phase === 'drop' ? caught.y : -160}px`, translate: '-50% -50%', rotate: '-70deg' }
                 : { top: `${8 + f.row * 23}%`, animationDuration: `${f.dur}s`, animationDelay: `${f.delay}s` }
             "
-            :aria-label="`Fish with letter ${f.letter}`"
+            :aria-label="m.games.fishWithLetter(f.letter)"
             @click="tap(f, $event)"
           >
             <span class="block h-full w-full" :class="{ 'animate-wiggle': wobble === f.id }">

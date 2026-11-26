@@ -6,6 +6,7 @@ import { sample, shuffle } from '~/utils/random'
 import { visualLabel } from '~/utils/labels'
 
 /** Flip cards to find pairs: animals, numbers ↔ amounts, or big ↔ little letters. */
+const { m } = useI18n()
 type Deck = 'animals' | 'numbers' | 'letters'
 interface Card { uid: number; pair: string; visual: ChoiceVisual; voice: string }
 
@@ -92,20 +93,20 @@ const isUp = (c: Card) => open.value.includes(c.uid) || found.value.includes(c.p
     <div v-if="!deck" class="flex flex-col items-center gap-6">
       <div class="flex items-center gap-2">
         <DinoMascot :size="120" mood="excited" listen />
-        <SpeechBubble><span class="text-2xl font-bold">Pick your cards!</span></SpeechBubble>
+        <SpeechBubble><span class="text-2xl font-bold">{{ m.games.pickCards }}</span></SpeechBubble>
       </div>
       <div class="flex flex-wrap justify-center gap-5">
-        <button type="button" class="toy flex h-40 w-40 flex-col items-center justify-center gap-2 bg-mint" aria-label="Animal cards" @click="choose('animals')">
+        <button type="button" class="toy flex h-40 w-40 flex-col items-center justify-center gap-2 bg-mint" :aria-label="m.games.animalCards" @click="choose('animals')">
           <span class="flex -space-x-4"><ObjectIcon name="cat" :size="64" /><ObjectIcon name="dog" :size="64" /></span>
-          <span class="text-xl font-bold">Animals</span>
+          <span class="text-xl font-bold">{{ m.games.animals }}</span>
         </button>
-        <button type="button" class="toy flex h-40 w-40 flex-col items-center justify-center gap-2 bg-sky" aria-label="Number cards" @click="choose('numbers')">
+        <button type="button" class="toy flex h-40 w-40 flex-col items-center justify-center gap-2 bg-sky" :aria-label="m.games.numberCards" @click="choose('numbers')">
           <span class="flex items-center gap-2"><BigGlyph value="3" size="3.5rem" /><ObjectCounter object="apple" :count="3" :size="22" /></span>
-          <span class="text-xl font-bold">Numbers</span>
+          <span class="text-xl font-bold">{{ m.games.numbers }}</span>
         </button>
-        <button type="button" class="toy flex h-40 w-40 flex-col items-center justify-center gap-2 bg-bubblegum" aria-label="Letter cards" @click="choose('letters')">
+        <button type="button" class="toy flex h-40 w-40 flex-col items-center justify-center gap-2 bg-bubblegum" :aria-label="m.games.letterCards" @click="choose('letters')">
           <BigGlyph value="Aa" size="3.5rem" />
-          <span class="text-xl font-bold">Letters</span>
+          <span class="text-xl font-bold">{{ m.games.letters }}</span>
         </button>
       </div>
     </div>
@@ -117,7 +118,7 @@ const isUp = (c: Card) => open.value.includes(c.uid) || found.value.includes(c.p
         :key="c.uid"
         type="button"
         class="card aspect-[3/4] min-h-28 [perspective:900px]"
-        :aria-label="isUp(c) ? visualLabel(c.visual) : 'Hidden card'"
+        :aria-label="isUp(c) ? visualLabel(c.visual) : m.games.hiddenCard"
         @click="flip(c)"
       >
         <span class="card-inner relative block h-full w-full transition-transform duration-500 [transform-style:preserve-3d]" :class="{ 'is-up': isUp(c) }">

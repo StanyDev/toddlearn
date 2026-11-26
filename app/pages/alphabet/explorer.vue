@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { LETTERS } from '~/data/learning'
 import { glyphColorFor } from '~/utils/theme'
+const { m } = useI18n()
 
 const audio = useAudio()
 const { progress, learnLetter, addStars, completeActivity, startActivity, isCompleted } = useProgress()
@@ -50,7 +51,7 @@ onMounted(() => {
       <span class="text-xl font-bold text-ink-soft">{{ index + 1 }} / 26</span>
     </ExplorerNav>
 
-    <nav class="grid w-full max-w-4xl grid-cols-6 gap-2 sm:grid-cols-9 lg:grid-cols-13" aria-label="All letters">
+    <nav class="grid w-full max-w-4xl grid-cols-6 gap-2 sm:grid-cols-9 lg:grid-cols-13" :aria-label="m.explorer.allLetters">
       <button
         v-for="(l, i) in LETTERS"
         :key="l.upper"
@@ -58,7 +59,7 @@ onMounted(() => {
         class="toy relative flex h-16 items-center justify-center bg-white text-3xl font-bold"
         :class="i === index ? 'ring-4 ring-sunny-deep' : ''"
         :style="{ color: glyphColorFor(l.upper) }"
-        :aria-label="`Letter ${l.upper}`"
+        :aria-label="m.common.letter(l.upper)"
         :aria-current="i === index"
         @click="show(i)"
       >

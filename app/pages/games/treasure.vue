@@ -3,6 +3,7 @@ import { LETTERS } from '~/data/learning'
 import { pick, sample, shuffle } from '~/utils/random'
 
 /** Search the meadow for the hidden number or letter Dino names. */
+const { m } = useI18n()
 const audio = useAudio()
 
 // Hiding spots (percent of the scene) — by the tree, house, pond, bushes…
@@ -59,13 +60,13 @@ function tap(t: Token) {
   <GameShell :game="game" activity-id="game-treasure">
     <div class="flex w-full max-w-6xl flex-col items-center gap-4">
       <div class="flex w-full flex-wrap items-center justify-center gap-4">
-        <GameQuestion text="Find" :voice="target ? ['can-you-find', target.voice] : []" :hint="target ? (/\d/.test(target.glyph) ? { kind: 'number', value: Number(target.glyph) } : { kind: 'letter', value: target.glyph }) : undefined" class="w-auto!" />
+        <GameQuestion :text="m.quiz.find" :voice="target ? ['can-you-find', target.voice] : []" :hint="target ? (/\d/.test(target.glyph) ? { kind: 'number', value: Number(target.glyph) } : { kind: 'letter', value: target.glyph }) : undefined" class="w-auto!" />
         <!-- treasure chest -->
-        <div class="flex items-center gap-2 rounded-3xl bg-[#A0673C] px-4 py-2 shadow-pop" aria-label="Treasure chest">
+        <div class="flex items-center gap-2 rounded-3xl bg-[#A0673C] px-4 py-2 shadow-pop" :aria-label="m.games.treasureChest">
           <ObjectIcon name="gem" :size="40" decorative />
           <div class="flex min-w-24 gap-1">
             <span v-for="f in found" :key="f.id" class="flex h-10 w-10 items-center justify-center rounded-full bg-sunny text-xl font-bold text-ink shadow-pop-sm">{{ f.glyph }}</span>
-            <span v-if="!found.length" class="text-lg font-semibold text-white/80">Treasure</span>
+            <span v-if="!found.length" class="text-lg font-semibold text-white/80">{{ m.games.treasure }}</span>
           </div>
         </div>
       </div>
@@ -79,7 +80,7 @@ function tap(t: Token) {
           class="absolute flex h-[clamp(64px,9vw,92px)] w-[clamp(64px,9vw,92px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[5px] border-white bg-gradient-to-br from-sunny to-sunny-deep text-[clamp(2rem,4.5vw,3rem)] font-bold text-ink shadow-pop transition-all duration-700"
           :class="[wobble === t.id ? 'animate-wiggle' : '', flying === t.id ? 'scale-150 opacity-0' : '']"
           :style="flying === t.id ? { left: '92%', top: '-10%' } : { left: `${t.x}%`, top: `${t.y}%`, rotate: `${t.tilt}deg` }"
-          :aria-label="`Treasure ${t.glyph}`"
+          :aria-label="m.games.treasureItem(t.glyph)"
           @click="tap(t)"
         >
           {{ t.glyph }}

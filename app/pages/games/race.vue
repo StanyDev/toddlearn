@@ -4,6 +4,7 @@ import { countObjects } from '~/utils/generators'
 import { visualLabel } from '~/utils/labels'
 
 /** Count correctly to drive Dino's car to the finish line. */
+const { m } = useI18n()
 const audio = useAudio()
 const question = ref<QuizQuestion | null>(null)
 const solved = ref<string | null>(null)
@@ -52,7 +53,7 @@ const stateOf = (c: Choice) => (solved.value ? (c.id === solved.value ? 'correct
   <GameShell :game="game" activity-id="game-race" :show-progress="false">
     <div class="flex w-full max-w-5xl flex-col items-center gap-5">
       <!-- race track -->
-      <div class="relative w-full rounded-[2rem] bg-mint/70 px-4 pt-4 pb-2 shadow-soft" role="progressbar" :aria-valuenow="Math.round(position * 100)" aria-valuemin="0" aria-valuemax="100" aria-label="Race progress">
+      <div class="relative w-full rounded-[2rem] bg-mint/70 px-4 pt-4 pb-2 shadow-soft" role="progressbar" :aria-valuenow="Math.round(position * 100)" aria-valuemin="0" aria-valuemax="100" :aria-label="m.games.raceProgress">
         <div class="relative h-[clamp(110px,16vw,150px)]">
           <div class="absolute inset-x-0 bottom-0 h-10 rounded-full bg-ink/70">
             <div class="absolute inset-x-4 top-1/2 h-1.5 -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#fff_0_24px,transparent_24px_48px)]" />

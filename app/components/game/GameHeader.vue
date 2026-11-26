@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /** Top bar for activities: hold-to-exit, title, replay instruction, stars. */
+const { m } = useI18n()
 withDefaults(defineProps<{ title: string; icon?: string; backTo: string; hold?: boolean; canReplay?: boolean }>(), {
   icon: undefined,
   hold: true,
@@ -19,7 +20,7 @@ defineEmits<{ replay: [] }>()
       v-if="canReplay"
       type="button"
       class="toy flex h-16 w-16 items-center justify-center bg-sunny text-ink sm:h-[4.5rem] sm:w-[4.5rem]"
-      aria-label="Hear the instruction again"
+      :aria-label="m.common.hearInstruction"
       @click="$emit('replay')"
     >
       <svg viewBox="0 0 48 48" class="h-9 w-9" aria-hidden="true">

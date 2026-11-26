@@ -3,7 +3,7 @@ import type { SfxName } from '../utils/synth'
 /**
  * Audio asset configuration.
  *
- * VOICE — see data/voice.ts. Files: public/audio/voice/<key>.m4a
+ * VOICE — see data/voice.ts. Files: public/audio/voice/<locale>/<key>.m4a
  *
  * SOUND EFFECTS — synthesised in code by default (utils/synth.ts). To use a
  * recorded effect instead, put the file in public/audio/sfx/ and map it here,

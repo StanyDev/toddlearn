@@ -3,6 +3,7 @@
  * Discreet entrance to the parent area: a small lock that must be held for
  * two seconds. It isn't part of the child's navigation.
  */
+const { m } = useI18n()
 const router = useRouter()
 const HOLD_MS = 2000
 const progress = ref(0)
@@ -35,8 +36,8 @@ const C = 2 * Math.PI * 20
   <button
     type="button"
     class="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/50 text-ink/40"
-    aria-label="Grown-ups area: press and hold for two seconds"
-    title="Grown-ups: press and hold"
+    :aria-label="m.gate.cornerAria"
+    :title="m.gate.cornerTitle"
     @pointerdown="down"
     @pointerup="up"
     @pointerleave="up"

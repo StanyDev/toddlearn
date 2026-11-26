@@ -1,6 +1,6 @@
 # DinoLand 🦕
 
-A playful, offline-first learning playground for toddlers (ages 3–4): numbers 1–20, the alphabet, colors, shapes and mini-games, guided by Dino the baby dinosaur.
+A playful, offline-first learning playground for toddlers (ages 3–4): numbers 1–20, the alphabet, colors, shapes and mini-games, guided by Dino the baby dinosaur. Playable in **English** and **Bahasa Indonesia**.
 
 Built with Nuxt 4 (SPA mode), Vue 3 `<script setup lang="ts">`, Tailwind CSS 4, Motion for Vue, Web Audio, SVG and a PWA service worker. There is no backend: all progress is stored on the device.
 
@@ -35,7 +35,7 @@ Notes:
 | **Colors & Shapes** | Color explorer, Shape explorer, Find the Color, Color Match, Color Hunt, Find the Shape, Shape Match, Sort It (by color / by shape) |
 | **Games** | Balloon Pop, Feed the Monster, Letter Fishing, Memory Cards, Number Race, Treasure Hunt, Build a Tower |
 | **Rewards** | Stars, 12 badges, 7 unlockable dino friends, 6 dress-up items, celebration pop-ups |
-| **Parents** | Hidden behind a press-and-hold lock on the home screen plus a grown-up math question or PIN: learning time, weekly chart, explored items, activity history, sound/motion/session settings, export and reset |
+| **Parents** | Hidden behind a press-and-hold lock on the home screen plus a grown-up math question or PIN: learning time, weekly chart, explored items, activity history, language, sound/motion/session settings, export and reset |
 
 Toddler-first rules apply everywhere: big touch targets, spoken instructions with visual hints, no timers, no penalties, gentle "try again" feedback, and hold-to-exit buttons inside activities.
 
@@ -51,12 +51,13 @@ app/
                 ObjectCounter, TracingBoard, Explorer shell/nav
     rewards/    StarCounter, StarReward, AchievementBadge, RewardPopup
     layout/     PlaygroundBackground, ParentCorner, ParentGate
-  composables/  useGame, useAudio, useProgress, useRewards, useSettings, useDragDrop, useParentSession
+  composables/  useGame, useAudio, useProgress, useRewards, useSettings, useI18n, useDragDrop, useParentSession
   data/         learning content, activities, rewards, voice catalogue, tracing glyphs, illustrations
+  locales/      languages: en.ts (UI text), id.ts (Indonesian UI text, content and phrases)
   pages/        index, numbers/, alphabet/, colors-shapes/, games/, rewards/, parent/
   utils/        question generators, storage + validation, random helpers, Web Audio synth
 public/
-  audio/voice/  recorded voice clips (see below)
+  audio/voice/  recorded voice clips per language: en/, id/ (see below)
   images/objects/  illustrations
   icons/        PWA icons
 scripts/        asset generators (voice, illustrations, icons)
@@ -64,10 +65,19 @@ scripts/        asset generators (voice, illustrations, icons)
 
 **Shared game engine:** every activity uses `useGame()` (rounds, stars, feedback, completion, progress tracking). Quiz and matching activities are fully data-driven: add a generator in `app/utils/generators.ts` and register it in `ACTIVITY_ENGINES` plus `data/activities.ts`.
 
+## Languages
+
+DinoLand ships in English and Bahasa Indonesia. On first launch it follows the browser's language; parents can switch at any time in the dashboard (**Language**). The choice is saved on the device and applies to screens, words, pictures and voice.
+
+- **UI text:** `app/locales/en.ts` defines every string; `app/locales/id.ts` must provide the same keys (a missing one is a type error). Components read them with `const { m } = useI18n()`.
+- **Learning content** (numbers, letters, colors, shapes, objects, activity and badge names) is written in English in `app/data/*` and translated by id in `app/locales/id.ts`. `localize()` makes those fields follow the current language, so `activity.title` or `color.name` is always translated.
+- **Alphabet words** are chosen per language so they start with the right letter: "B untuk Bola", "H untuk Harimau", "N untuk Nanas". Q has almost no everyday Indonesian words, so it uses "Queen"; change any word or picture in `ID_LETTERS`.
+- **Adding a language:** add it to `LOCALES` in `app/locales/index.ts`, create a messages file and data table like `id.ts`, register it in `useI18n.ts`, `voice.ts` and `scripts/generate-voice.mjs`, then generate or record its clips.
+
 ## Audio
 
-- **Voice:** every spoken line has a key in `app/data/voice.ts`, and its file lives at `public/audio/voice/<key>.m4a` (e.g. `numbers/5.m4a`, `letters/a.m4a`, `letter-words/a.m4a`, `find-the-number.m4a`).
-  The shipped clips are development recordings generated with macOS text-to-speech (`node scripts/generate-voice.mjs`). To use a professional voice-over, record files with the same names and replace them. No code changes are needed.
+- **Voice:** every spoken line has a key in `app/data/voice.ts`, and its file lives at `public/audio/voice/<lang>/<key>.m4a` (e.g. `en/numbers/5.m4a` "Five", `id/numbers/5.m4a` "Lima", `id/letter-words/b.m4a` "be, untuk Bola!"). The same keys are used in every language.
+  The shipped clips are development recordings generated with macOS text-to-speech (`node scripts/generate-voice.mjs`; voices Samantha and Damayanti; `--lang=id` for one language). To use a professional voice-over, record files with the same names and replace them. No code changes are needed.
   If a clip is missing, the app falls back to the browser's speech synthesis. Parents can turn this off.
 - **Sound effects:** synthesised with Web Audio (`app/utils/synth.ts`), so they're friendly, never harsh, and need no assets. To use recorded effects, map them in `app/data/audio.ts`.
 - Parents can mute the sound or adjust voice and effects volume separately in the dashboard.
@@ -78,7 +88,7 @@ Progress, rewards and settings are stored in `localStorage` (`dinoland:*` keys),
 
 ## Offline
 
-The PWA service worker precaches the app shell, all illustrations and all voice clips (~4 MB), so after the first visit DinoLand works with no connection and can be installed to the home screen.
+The PWA service worker precaches the app shell, all illustrations and all voice clips in both languages (~6 MB), so after the first visit DinoLand works with no connection and can be installed to the home screen.
 
 ## Credits
 

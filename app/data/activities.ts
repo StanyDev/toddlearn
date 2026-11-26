@@ -1,4 +1,6 @@
 import type { ActivityDef, ActivityId, CategoryId, ThemeColor } from '../types'
+import { localize } from '../locales/index.ts'
+import { ID_ACTIVITIES, ID_CATEGORIES } from '../locales/id.ts'
 
 export interface CategoryDef {
   id: CategoryId
@@ -53,6 +55,9 @@ export const ACTIVITIES: ActivityDef[] = [
   { id: 'game-treasure', category: 'games', title: 'Treasure Hunt', to: '/games/treasure', icon: 'map', color: 'sunny', voice: 'can-you-find' },
   { id: 'game-tower', category: 'games', title: 'Build a Tower', to: '/games/tower', icon: 'bricks', color: 'bubblegum', voice: 'build-tower' },
 ]
+
+localize(CATEGORIES, 'title', { id: (c) => ID_CATEGORIES[c.id] })
+localize(ACTIVITIES, 'title', { id: (a) => ID_ACTIVITIES[a.id] })
 
 const byId = new Map(ACTIVITIES.map((a) => [a.id, a]))
 export const getActivity = (id: ActivityId) => byId.get(id)!

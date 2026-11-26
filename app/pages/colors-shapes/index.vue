@@ -1,3 +1,3 @@
 <template>
-  <CategoryHub category="colors-shapes" greeting="Colors and shapes!" />
+  <CategoryHub category="colors-shapes" />
 </template>

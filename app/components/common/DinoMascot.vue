@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { DecorationId, DinoMood } from '~/types'
 import { dinoById } from '~/data/rewards'
+const { m } = useI18n()
 
 const props = withDefaults(
   defineProps<{
@@ -54,7 +55,7 @@ const spikes = [
 </script>
 
 <template>
-  <div class="relative inline-block shrink-0" :style="sizeStyle" role="img" :aria-label="`${def.name} the dinosaur`">
+  <div class="relative inline-block shrink-0" :style="sizeStyle" role="img" :aria-label="m.common.dino(def.name)">
     <svg viewBox="0 -30 220 240" class="h-full w-full overflow-visible" :class="{ 'animate-bob': animated }">
       <ellipse cx="110" cy="205" rx="62" ry="8" fill="#3d3a5c" opacity="0.1" />
 
