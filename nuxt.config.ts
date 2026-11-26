@@ -21,6 +21,7 @@ export default defineNuxtConfig({
   },
 
   app: {
+    baseURL: '/toddlearn/',
     pageTransition: { name: 'page', mode: 'out-in' },
     head: {
       title: 'DinoLand',
@@ -36,8 +37,8 @@ export default defineNuxtConfig({
         { name: 'apple-mobile-web-app-title', content: 'DinoLand' },
       ],
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/icons/icon.svg' },
-        { rel: 'apple-touch-icon', href: '/icons/apple-touch-icon.png' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/toddlearn/icons/icon.svg' },
+        { rel: 'apple-touch-icon', href: '/toddlearn/icons/apple-touch-icon.png' },
       ],
     },
   },
@@ -52,16 +53,17 @@ export default defineNuxtConfig({
       background_color: '#FFFDF5',
       display: 'standalone',
       orientation: 'any',
-      start_url: '/',
+      scope: '/toddlearn/',
+      start_url: '/toddlearn/',
       icons: [
-        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-        { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        { src: '/toddlearn/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/toddlearn/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/toddlearn/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
       ],
     },
     workbox: {
       // Any route opened offline is served by the precached app shell.
-      navigateFallback: '/index.html',
+      navigateFallback: '/toddlearn/index.html',
       // Precache the app shell plus every illustration and voice clip so the
       // whole playground works offline after the first visit.
       globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest,woff2,m4a}'],

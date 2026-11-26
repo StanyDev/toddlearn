@@ -9,11 +9,22 @@ Built with Nuxt 4 (SPA mode), Vue 3 `<script setup lang="ts">`, Tailwind CSS 4, 
 ```bash
 yarn install
 yarn dev            # http://localhost:3000
-yarn generate       # static build in .output/public (deploy anywhere)
+yarn generate       # static build in .output/public (static build; see Deploying below)
 npx nuxi typecheck  # type-check the project
 ```
 
-When deploying `.output/public`, configure the host to serve `index.html` (or `200.html`) for unknown paths. That's standard SPA fallback, and it lets deep links like `/numbers/count` work before the service worker is installed.
+## Deploying to GitHub Pages
+
+The app is configured as a GitHub Pages **project site** and is served from `https://stanydev.github.io/toddlearn/` (`app.baseURL` is `/toddlearn/` in `nuxt.config.ts`; the PWA manifest, icons and service-worker fallback use the same prefix). If the repository or its owner is renamed, or a custom domain is used, update that prefix.
+
+1. In the repository go to **Settings → Pages** and set **Source** to **GitHub Actions**.
+2. Push to `master` (or run **Deploy to GitHub Pages** from the Actions tab). `.github/workflows/deploy.yml` runs `yarn install --frozen-lockfile` and `yarn generate`, then publishes `.output/public` with the official Pages actions.
+
+Notes:
+
+- The published site is public to everyone, even if the repository is private. Pages from a private repository requires a paid GitHub plan; GitHub Free needs a public repository.
+- GitHub Pages has no SPA fallback to `index.html`. Instead it serves `404.html` for unknown paths, and `nuxt generate` writes `404.html` as a copy of the app shell, so deep links such as `/toddlearn/numbers/count` still boot the app and the router renders the route (the HTTP status of such a first load is 404, and the service worker serves the shell once installed).
+- Other static hosts at the domain root: change `baseURL` to `/` and serve `index.html` (or `200.html`) for unknown paths.
 
 ## What's inside
 
